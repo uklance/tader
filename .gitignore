@@ -1,0 +1,6 @@
+grater-core/target/
+grater-hibernate/target/
+grater-liquibase/target/
+.settings/
+.classpath
+.project
