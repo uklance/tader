@@ -1,5 +1,7 @@
 package org.grater.model;
 
-public interface PrimaryKey {
+import java.util.List;
 
+public interface PrimaryKey {
+	public List<String> getColumns();
 }
