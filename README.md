@@ -19,7 +19,7 @@ statement.executeUpdate(
    "create table author (" +
       "author_id int not null, " +
       "name varchar(255) not null, " +
-      "constraint pk_author primary key (author_id)"
+      "constraint pk_author primary key (author_id)" +
     ")"
 );
 statement.executeUpdate(
@@ -28,7 +28,7 @@ statement.executeUpdate(
       "author_id int not null, " +
       "name varchar(255) not null, " +
       "constraint pk_book primary key (author_id), "
-      "constraint fk_book_author foreign_key (author_id) references author(author_id)
+      "constraint fk_book_author foreign_key (author_id) references author(author_id)" +
     ")"
 );
 statement.close();
