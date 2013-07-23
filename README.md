@@ -57,6 +57,6 @@ Assert.assertNotNull(generatedAuthor);
 Assert.assertNotNull(generatedAuthor.getString("name"));
 
 // author id populated by identity
-int authorId = generatedAuthor.getInd("authorId");
+int authorId = generatedAuthor.getInt("authorId");
 Assert.assertTrue(authorId > 0);
 ```
