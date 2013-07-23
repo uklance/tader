@@ -36,7 +36,7 @@ statement.executeUpdate(
 statement.close();
 con.close();
 
-// reverse engineer the schema from the DataSource
+// reverse engineer the schema model from the DataSource
 SchemaSource schemaSource = new DataSourceSchemaSource(ds);
 
 // initialize grater
