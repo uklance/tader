@@ -6,7 +6,8 @@ public interface Grater {
 	TableRow insert(TableRow row);
 	TableRow insert(String table, Map<String, Object> fields);
 	TableRow insert(String table, Object... columnsAndValues);
-	TableRow select(String name, Map<String, Object> values);
+	TableRow select(String name, Map<String, Object> pk);
+	TableRow select(String name, Object pk);
     
 	/*
 	<T extends Entity> insert(Class<T> type, Map fields);
