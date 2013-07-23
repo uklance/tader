@@ -46,14 +46,17 @@ Grater grater = new GraterBuilder().withSchemaSource(schemaSource).withDataSourc
 TableRow row = grater.insert("book", "name", "War and Peace");
 
 // bookId populated by identity
-int bookId = row.get("bookId", Integer.class);
+int bookId = row.getInt("bookId");
+Assert.assertTrue(bookId > 0);
 
 // required foreign key is populated
-TableRow generatedAuthor = row.get("author", TableRow.class);
+TableRow generatedAuthor = row.getRow("author");
+Assert.assertNotNull(generatedAuthor);
 
 // author name is generated
-Assert.assertNotNull(generatedAuthor.get("name"));
+Assert.assertNotNull(generatedAuthor.getString("name"));
 
 // author id populated by identity
-Assert.assertNotNull(generatedAuthor.get("authorId"));
+int authorId = generatedAuthor.getInd("authorId");
+Assert.assertTrue(authorId > 0);
 ```
