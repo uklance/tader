@@ -49,4 +49,22 @@ public class GraterUtils {
 		}
 		return builder.toString();
 	}
+
+	public static String toCamelCase(String name) {
+		StringBuilder builder = new StringBuilder();
+		boolean nextUpper = false;
+		for (char ch : name.toCharArray()) {
+			if (ch == '_') {
+				nextUpper = true;
+			} else {
+				if (nextUpper) {
+					builder.append(Character.toUpperCase(ch));
+				} else {
+					builder.append(Character.toLowerCase(ch));
+				}
+				nextUpper = false;
+			}
+		}
+		return builder.toString();	
+	}
 }

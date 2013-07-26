@@ -1,6 +1,7 @@
 grater-core/target/
 grater-hibernate/target/
 grater-liquibase/target/
+grater-test/target/
 .settings/
 .classpath
 .project

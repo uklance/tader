@@ -1,12 +1,20 @@
-package org.grater.hibernate;
+package org.grater;
 
 import java.sql.Connection;
 import java.util.Map;
 
 import org.grater.GraterDao;
 import org.grater.model.TableModel;
+import org.hibernate.dialect.Dialect;
 
 public class DefaultGraterDao implements GraterDao {
+	private final Dialect dialect;
+	
+	public DefaultGraterDao(Dialect dialect) {
+		super();
+		this.dialect = dialect;
+	}
+
 	@Override
 	public Map<String, Object> insert(Connection con, TableModel table, Map<String, Object> values) {
 		throw new UnsupportedOperationException("insert");

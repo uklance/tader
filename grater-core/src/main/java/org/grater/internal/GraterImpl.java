@@ -44,8 +44,7 @@ public class GraterImpl implements Grater {
 	@Override
 	public Entity insert(PartialEntity partial) {
 		final TableModel table = model.getTable(partial.getTable());
-		Map<String, Object> partialValues = partial.getValues();
-		
+		Map<String, Object> partialValues = partial.getValues();		
 		Map<String, Object> preInsertValues = new LinkedHashMap<String, Object>();
 		
 		IncrementProvider incrementProvider = new IncrementProvider() {

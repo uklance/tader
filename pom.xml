@@ -12,6 +12,7 @@
         <module>grater-core</module>
         <module>grater-hibernate</module>
         <module>grater-liquibase</module>
+        <module>grater-test</module>
     </modules>
 	<!--
 		<properties>
