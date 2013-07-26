@@ -3,12 +3,11 @@ package org.grater;
 import java.util.Map;
 
 public interface Grater {
-	TableRow insert(TableRow row);
-	TableRow insert(String table, Object... columnsAndValues);
-	TableRow insert(String table, Map<String, Object> fields);
-	TableRow select(String table, Object pk);
-	TableRow select(String table, Object... columnsAndValues);
-	TableRow select(String table, Map<String, Object> pk);
+	Entity insert(PartialEntity row);
+	Entity insert(String table, Object... columnsAndValues);
+	Entity insert(String table, Map<String, Object> fields);
+	Entity select(String table, Object pk);
+	Entity select(String table, Map<String, Object> pk);
     
 	/*
 	<T extends Entity> insert(Class<T> type, Map fields);

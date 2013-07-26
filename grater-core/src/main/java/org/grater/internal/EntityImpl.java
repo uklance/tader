@@ -2,13 +2,13 @@ package org.grater.internal;
 
 import java.util.Map;
 
-import org.grater.TableRow;
+import org.grater.Entity;
 
-public class TableRowImpl implements TableRow {
+public class EntityImpl implements Entity {
 	private final String table;
 	private final Map<String, Object> values;
 	
-	public TableRowImpl(String table, Map<String, Object> values) {
+	public EntityImpl(String table, Map<String, Object> values) {
 		super();
 		this.table = table;
 		this.values = values;

@@ -1,19 +1,18 @@
 package org.grater.internal;
 
 import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
-import javax.sql.DataSource;
-
+import org.grater.ConnectionSource;
+import org.grater.Entity;
 import org.grater.Grater;
+import org.grater.GraterDao;
 import org.grater.GraterException;
 import org.grater.IncrementProvider;
-import org.grater.TableRow;
+import org.grater.PartialEntity;
 import org.grater.ValueGenerator;
 import org.grater.ValueParser;
 import org.grater.model.ColumnModel;
@@ -22,30 +21,32 @@ import org.grater.model.TableModel;
 
 public class GraterImpl implements Grater {
 	private final GraterModel model;
-	private final DataSource dataSource;
+	private final GraterDao dao;
+	private final ConnectionSource connectionSource;
 	
-	public GraterImpl(GraterModel model, DataSource dataSource) {
+	public GraterImpl(GraterModel model, ConnectionSource connectionSource, GraterDao dao) {
 		super();
 		this.model = model;
-		this.dataSource = dataSource;
+		this.connectionSource = connectionSource;
+		this.dao = dao;
 	}
 
 	@Override
-	public TableRow insert(String table, Object... columnsAndValues) {
+	public Entity insert(String table, Object... columnsAndValues) {
 		return insert(table, GraterUtils.asMap(String.class, Object.class, columnsAndValues));
 	}
 	
 	@Override
-	public TableRow insert(String table, Map<String, Object> values) {
-		return insert(new TableRowImpl(table, values));
+	public Entity insert(String table, Map<String, Object> values) {
+		return insert(new PartialEntityImpl(table, values));
 	}
 	
 	@Override
-	public TableRow insert(TableRow row) {
-		final TableModel table = model.getTable(row.getTable());
-		Map<String, Object> preValues = row.getValues();
+	public Entity insert(PartialEntity partial) {
+		final TableModel table = model.getTable(partial.getTable());
+		Map<String, Object> partialValues = partial.getValues();
 		
-		Map<String, Object> postValues = new LinkedHashMap<String, Object>();
+		Map<String, Object> preInsertValues = new LinkedHashMap<String, Object>();
 		
 		IncrementProvider incrementProvider = new IncrementProvider() {
 			private Integer increment;
@@ -57,38 +58,58 @@ public class GraterImpl implements Grater {
 				return increment;
 			}
 		};
+		Connection con = connectionSource.getConnection();
+		
 		try {
-			Connection con = dataSource.getConnection();
-			
-			try {
-				for (ColumnModel column : table.getColumns()) {
-					Object postValue;
-					boolean isForeign = table.isForeignKey(column.getName());
-					if (preValues.containsKey(column.getName())) {
-						Object preValue = preValues.get(column.getName());
-						if (isForeign) {
-							postValue = parseForeignValue(column, preValue);
-						} else {
-							postValue = parseValue(column, preValue);
-						}
+			for (ColumnModel column : table.getColumns()) {
+				Object value;
+				boolean isForeign = table.isForeignKey(column.getName());
+				if (partialValues.containsKey(column.getName())) {
+					Object preValue = partialValues.get(column.getName());
+					if (isForeign) {
+						value = parseForeignValue(column, preValue);
 					} else {
-						if (isForeign) {
-							postValue = generateForeignValue(column);
-						} else {
-							postValue = generateValue(column, incrementProvider);
-						}
+						value = parseValue(column, preValue);
 					}
-					postValues.put(column.getName(), postValue);
+				} else {
+					if (isForeign) {
+						ColumnModel foreignColumn = table.getForeignColumn(column.getName());
+						value = generateForeignValue(con, foreignColumn);
+					} else {
+						value = generateValue(column, incrementProvider);
+					}
 				}
-				
-				doInsert(con, table, postValues);
-				return new TableRowImpl(table.getName(), postValues);
-			} finally {
-				con.close();
+				preInsertValues.put(column.getName(), value);
 			}
-		} catch (SQLException e) {
-			throw new GraterException(e);
+			
+			Map<String, Object> postInsertValues = dao.insert(con, table, preInsertValues);
+			return new EntityImpl(table.getName(), postInsertValues);
+		} finally {
+			connectionSource.returnConnection(con);
 		}
+	}
+	
+	@Override
+	public Entity select(String table, Map<String, Object> pk) {
+		Connection con = connectionSource.getConnection();
+		try {
+			Map<String, Object> values = dao.select(con, model.getTable(table), pk);
+			return new EntityImpl(table, values);
+		} finally {
+			connectionSource.returnConnection(con);
+		}
+	}
+	
+	@Override
+	public Entity select(String table, Object pk) {
+		TableModel tableModel = model.getTable(table);
+		Set<ColumnModel> primaryKey = tableModel.getPrimaryKey();
+		if (primaryKey.size() == 1) {
+			throw new GraterException(String.format("%s has %s primary key columns, expected 1", table, primaryKey.size()));
+		}
+		String pkColumnName = primaryKey.iterator().next().getName();
+		Map<String, Object> values = GraterUtils.asMap(String.class, Object.class, pkColumnName, pk);
+		return select(table, values);
 	}
 
 	protected Object generateValue(ColumnModel column, IncrementProvider incrementProvider) {
@@ -96,8 +117,8 @@ public class GraterImpl implements Grater {
 		return generator.generateValue(column.getTable().getTable(), column.getColumn(), incrementProvider);
 	}
 
-	private Object generateForeignValue(ColumnModel column) {
-		throw new UnsupportedOperationException("generateForeignValue");
+	protected Entity generateForeignValue(Connection con, ColumnModel foreignColumn) {
+		return insert(foreignColumn.getTable().getName(), Collections.emptyMap());
 	}
 
 	protected Object parseValue(ColumnModel column, Object preValue) {
@@ -105,7 +126,7 @@ public class GraterImpl implements Grater {
 		return parser.parseValue(column.getTable().getTable(), column.getColumn(), preValue);
 	}
 
-	protected TableRow parseForeignValue(ColumnModel column, Object preValue) {
+	protected Entity parseForeignValue(ColumnModel column, Object preValue) {
 		Map<String, Object> values = asMap(preValue);
 		
 		TableModel table = column.getTable();
@@ -130,38 +151,16 @@ public class GraterImpl implements Grater {
 		return insert(foreignTable.getName(), values);
 	}
 	
-	protected TableRow doSelect(Connection con, TableModel table, Map<String, Object> primaryKey) {
-		StringBuilder sql = new StringBuilder("select * from " + table.getTable().getName() + " where");
-		Object[] pkValues = new Object[table.getPrimaryKey().size()];
-		int[] pkTypes = new int[table.getPrimaryKey().size()];
-		int i = 0;
-		for (ColumnModel pkColumn : table.getPrimaryKey()) {
-			Object pkValue = primaryKey.get(pkColumn.getName());
-			if (pkValue == null) {
-				throw new GraterException(String.format("Primary key column %s not provided", pkColumn));
-			}
-			pkValues[i] = parseValue(pkColumn, pkValue);
-			pkTypes[i] = pkColumn.getColumn().getType();
-			
-			if (i != 0) {
-				sql.append(" and");
-			}
-			sql.append(" " + pkColumn.getColumn().getName() + " = ?");
-			++i;
-		}
-		PreparedStatement ps = con.prepareStatement(sql.toString());
-	}
-	
-	protected Map<String, Object> asMap(Object preValue) {
-		if (preValue == null) {
+	protected Map<String, Object> asMap(Object value) {
+		if (value == null) {
 			return Collections.emptyMap();
 		}
-		if (preValue instanceof Map) {
-			return (Map) preValue;
+		if (value instanceof Map) {
+			return (Map) value;
 		}
-		throw new GraterException("Illegal type " + preValue.getClass().getName());
-	}
-
-	protected void doInsert(Connection con, TableModel table, Map<String, Object> values) {
+		if (value instanceof PartialEntity) {
+			return ((PartialEntity) value).getValues();
+		}
+		throw new GraterException("Illegal type " + value.getClass().getName());
 	}
 }
