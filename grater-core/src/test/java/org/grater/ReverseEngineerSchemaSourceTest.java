@@ -19,7 +19,7 @@ public class ReverseEngineerSchemaSourceTest {
 		try {
 			initializeDatabase(con);
 			
-			ConnectionSource cs = new SingleConnectionSource(con);
+			ConnectionSource cs = new SingletonConnectionSource(con);
 			
 			SchemaSource schemaSource = new ReverseEngineerSchemaSource(cs, "test", null);
 			Schema schema = schemaSource.getSchema();
@@ -27,9 +27,13 @@ public class ReverseEngineerSchemaSourceTest {
 			//assertEquals(2, schema.getTables().size());
 			Table authorTable = getTable(schema, "author");
 			assertEquals(2, authorTable.getColumns().size());
+			Column authorName = getColumn(authorTable, "name");
+			assertEquals(50, authorName.getSize());
 	
 			Table bookTable = getTable(schema, "book");
 			assertEquals(3, bookTable.getColumns().size());
+			Column bookName = getColumn(bookTable, "name");
+			assertEquals(60, bookName.getSize());
 		} finally {
 			con.close();
 		}
@@ -47,7 +51,7 @@ public class ReverseEngineerSchemaSourceTest {
 
 	protected Column getColumn(Table table, String name) {
 		for (Column column : table.getColumns()) {
-			if (column.getName().equals(name)) {
+			if (column.getName().toLowerCase().equals(name.toLowerCase())) {
 				return column;
 			}
 		}
@@ -62,7 +66,7 @@ public class ReverseEngineerSchemaSourceTest {
 		statement.executeUpdate(
 		   "create table author (" +
 		      "author_id int identity(1,1) not null, " +
-		      "name varchar(255) not null, " +
+		      "name varchar(50) not null, " +
 		      "constraint pk_author primary key (author_id)" +
 		    ")"
 		);
@@ -70,7 +74,7 @@ public class ReverseEngineerSchemaSourceTest {
 		   "create table book (" +
 		      "book_id int identity(1,1) not null, " +
 		      "author_id int not null, " +
-		      "name varchar(255) not null, " +
+		      "name varchar(60) not null, " +
 		      "constraint pk_book primary key (book_id), " +
 		      "constraint fk_book_author foreign key (author_id) references author(author_id)" +
 		    ")"

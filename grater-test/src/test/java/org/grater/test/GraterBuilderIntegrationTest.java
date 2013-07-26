@@ -11,7 +11,7 @@ import org.grater.GraterBuilder;
 import org.grater.ReverseEngineerSchemaSource;
 import org.grater.SchemaSource;
 import org.grater.SimpleConnectionSource;
-import org.grater.SingleConnectionSource;
+import org.grater.SingletonConnectionSource;
 import org.hibernate.dialect.Dialect;
 import org.hibernate.dialect.H2Dialect;
 import org.junit.Assert;
@@ -25,7 +25,7 @@ public class GraterBuilderIntegrationTest {
 		try {
 			initializeDatabase(con);
 			
-			ConnectionSource cs = new SingleConnectionSource(con);
+			ConnectionSource cs = new SingletonConnectionSource(con);
 			Dialect dialect = new H2Dialect();
 	
 			// reverse engineer the schema model from the DataSource
