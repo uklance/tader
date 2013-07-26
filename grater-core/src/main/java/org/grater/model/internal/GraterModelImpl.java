@@ -10,9 +10,9 @@ import org.grater.model.GraterModel;
 import org.grater.model.TableModel;
 
 public class GraterModelImpl implements GraterModel {
-	private final Map<String, TableModel> tableModels;
+	private final Map<String, ? extends TableModel> tableModels;
 	
-	public GraterModelImpl(Map<String, TableModel> tableModels) {
+	public GraterModelImpl(Map<String, ? extends TableModel> tableModels) {
 		super();
 		this.tableModels = tableModels;
 	}

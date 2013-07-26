@@ -10,11 +10,13 @@ import java.util.Map;
 import java.util.Set;
 
 import org.grater.ColumnNameResolver;
+import org.grater.GraterException;
 import org.grater.GraterModelSource;
 import org.grater.TableNameResolver;
 import org.grater.TableOrderer;
 import org.grater.model.Column;
 import org.grater.model.ColumnModel;
+import org.grater.model.ForeignKey;
 import org.grater.model.GraterModel;
 import org.grater.model.Schema;
 import org.grater.model.Table;
@@ -37,13 +39,14 @@ public class GraterModelSourceImpl implements GraterModelSource {
 	}
 
 	public GraterModel getGraterModel(Schema schema) {
-		Map<String, TableModel> tableModels = new LinkedHashMap<String, TableModel>();
+		Map<String, TableModelImpl> tableModels = new LinkedHashMap<String, TableModelImpl>();
 		Collection<Table> tables = schema.getTables();
 		List<Table> tableOrder = tableOrderer.getTableOrder(tables);
 		if (tables.size() != tableOrder.size()) {
 			throw new RuntimeException(String.format("Expected %s tables from TableOrderer found %s", tables.size(), tableOrder.size()));
 		}
 		int i = 0;
+		
 		for (Table table : tableOrder) {
 			String tableName = tableNameResolver.resolveName(table);
 			TableModelImpl tableModel = new TableModelImpl(tableName, table, i++);
@@ -70,6 +73,18 @@ public class GraterModelSourceImpl implements GraterModelSource {
 			
 			tableModel.setPrimaryKey(pk);
 			tableModels.put(tableName, tableModel);
+		}
+		
+		// now that all ColumnModels are resolved, join foreign keys
+		for (TableModelImpl tableModel : tableModels.values()) {
+			for (ForeignKey foreignKey : tableModel.getTable().getForeignKeys()) {
+				TableModel foreignTable = tableModels.get(foreignKey.getReferenceTable());
+				if (foreignTable == null) {
+					throw new GraterException(String.format("Could not locate reference table %s", foreignKey.getReferenceTable()));
+				}
+				ColumnModel foreignColumn = foreignTable.getColumn(foreignKey.getReferenceColumn());
+				tableModel.addForeignKey(foreignKey.getColumn(), foreignColumn);
+			}
 		}
 		
 		return new GraterModelImpl(tableModels);

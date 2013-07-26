@@ -4,14 +4,15 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-import javax.sql.DataSource;
-
-import org.apache.commons.dbcp.BasicDataSource;
-import org.grater.DataSourceSchemaSource;
+import org.grater.ConnectionSource;
 import org.grater.Entity;
 import org.grater.Grater;
 import org.grater.GraterBuilder;
+import org.grater.ReverseEngineerSchemaSource;
 import org.grater.SchemaSource;
+import org.grater.SimpleConnectionSource;
+import org.grater.SingleConnectionSource;
+import org.hibernate.dialect.Dialect;
 import org.hibernate.dialect.H2Dialect;
 import org.junit.Assert;
 import org.junit.Test;
@@ -20,8 +21,46 @@ public class GraterBuilderIntegrationTest {
 
 	@Test
 	public void test() throws SQLException {
-		DataSource ds = createDataSource();
-		Connection con = ds.getConnection();
+		Connection con = getConnection();
+		try {
+			initializeDatabase(con);
+			
+			ConnectionSource cs = new SingleConnectionSource(con);
+			Dialect dialect = new H2Dialect();
+	
+			// reverse engineer the schema model from the DataSource
+			SchemaSource schemaSource = new ReverseEngineerSchemaSource(cs);
+	
+			// initialize grater
+			Grater grater = new GraterBuilder()
+				.withSchemaSource(schemaSource)
+				.withConnectionSource(cs)
+				.withDialect(dialect)
+				.build();
+	
+			// insert a book without an author
+			Entity book = grater.insert("book", "name", "War and Peace");
+	
+			// bookId populated by identity
+			int bookId = book.getInteger("bookId");
+			Assert.assertTrue(bookId > 0);
+	
+			// required foreign key is populated
+			Entity author = book.getEntity("author");
+			Assert.assertNotNull(author);
+	
+			// author name is generated
+			Assert.assertNotNull(author.getString("name"));
+	
+			// author id populated by identity
+			int authorId = author.getInteger("authorId");
+			Assert.assertTrue(authorId > 0);
+		} finally {
+			con.close();
+		}
+	}
+	
+	protected void initializeDatabase(Connection con) throws SQLException {
 		Statement statement = con.createStatement();
 
 		// initialize the schema
@@ -42,45 +81,14 @@ public class GraterBuilderIntegrationTest {
 		    ")"
 		);
 		statement.close();
-		con.close();
-
-		// reverse engineer the schema model from the DataSource
-		SchemaSource schemaSource = new DataSourceSchemaSource(ds, new H2Dialect());
-
-		// initialize grater
-		Grater grater = new GraterBuilder()
-			.withSchemaSource(schemaSource)
-			.withDataSource(ds)
-			.withDialect(new H2Dialect())
-			.build();
-
-		// insert a book without an author
-		Entity book = grater.insert("book", "name", "War and Peace");
-
-		// bookId populated by identity
-		int bookId = book.getInteger("bookId");
-		Assert.assertTrue(bookId > 0);
-
-		// required foreign key is populated
-		Entity author = book.getEntity("author");
-		Assert.assertNotNull(author);
-
-		// author name is generated
-		Assert.assertNotNull(author.getString("name"));
-
-		// author id populated by identity
-		int authorId = author.getInteger("authorId");
-		Assert.assertTrue(authorId > 0);
 	}
 	
-	protected DataSource createDataSource() {
+	protected Connection getConnection() {
 		String driverClassName = "org.h2.Driver";
 		String url = "jdbc:h2:mem:test";
-		BasicDataSource ds = new BasicDataSource();
-		ds.setDriverClassName(driverClassName);
-		ds.setUrl(url);
-		//ds.setUsername(user);
-		//ds.setPassword(password);
-		return ds;
+		String user = null;
+		String password = null;
+		
+		return new SimpleConnectionSource(driverClassName, url, user, password).getConnection();
 	}
 }

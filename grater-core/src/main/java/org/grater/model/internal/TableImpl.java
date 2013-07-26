@@ -37,4 +37,9 @@ public class TableImpl implements Table {
 	public Collection<ForeignKey> getForeignKeys() {
 		return foreignKeys;
 	}
+	
+	@Override
+	public String toString() {
+		return String.format("Table[%s]", name);
+	}
 }
