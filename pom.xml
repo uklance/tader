@@ -10,14 +10,5 @@
 	
     <modules>
         <module>grater-core</module>
-        <module>grater-hibernate</module>
-        <module>grater-liquibase</module>
-        <module>grater-test</module>
     </modules>
-	<!--
-		<properties>
-			<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-			<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-		</properties>
-	-->
 </project>
