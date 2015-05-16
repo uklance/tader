@@ -7,4 +7,6 @@ public interface Entity {
 	Object getPrimaryKey();
 	Entity getEntity(String propertyName);
 	<T> T getValue(String propertyName, Class<T> type);
+	Object getValue(String propertyName);
+	String getString(String propertyName);
 }

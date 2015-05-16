@@ -1,5 +1,8 @@
 package org.grater.jdbc;
 
-public interface ConnectionCallback {
+import java.sql.Connection;
+import java.sql.SQLException;
 
+public interface ConnectionCallback<T> {
+	T handle(Connection con) throws SQLException;
 }

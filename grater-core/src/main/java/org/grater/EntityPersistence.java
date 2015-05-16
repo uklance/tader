@@ -3,6 +3,11 @@ package org.grater;
 import java.util.Map;
 
 public interface EntityPersistence {
-	Entity insert(String entityName, Map<String, Object> values);
+	/**
+	 * @param entityName
+	 * @param values
+	 * @return The primary key of the inserted entity
+	 */
+	Object insert(String entityName, Map<String, Object> values);
 	Entity get(String entityName, Object primaryKey);
 }
