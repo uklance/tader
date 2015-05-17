@@ -80,6 +80,7 @@ public class JdbcEntityPersistence implements EntityPersistence {
 						InsertHandler insertHandler = insertHandlerSource.get(propDef);
 
 						ResultSet rs = ps.getGeneratedKeys();
+						rs.next();
 						pk = insertHandler.getGeneratedKey(rs, propDef);
 					}
 				}

@@ -20,6 +20,13 @@ public class JdbcEntityPersistenceTest {
 		}
 	}
 
+	@Test
+	public void testIdentity() {
+		for (TestJdbcTemplate template : TestUtils.getTestJdbcTemplates()) {
+			testIdentity(template);
+		}
+	}
+	
 	private void testPersistence(TestJdbcTemplate template) {
 		TestUtils.createTableAuthor(template);
 		
@@ -35,6 +42,21 @@ public class JdbcEntityPersistenceTest {
 		assertEquals("name2", author2.getString("authorName"));
 	}
 
+	private void testIdentity(TestJdbcTemplate template) {
+		TestUtils.createTableHasIdentity(template);
+		
+		EntityPersistence persistence = createEntityPersistence(template);
+		
+		Number pk1 = (Number) persistence.insert("hasIdentity", TestUtils.createMap("name", "name1"));
+		Number pk2 = (Number) persistence.insert("hasIdentity", TestUtils.createMap("name", "name2"));
+
+		assertEquals(1, pk1.intValue());
+		assertEquals(2, pk2.intValue());
+		
+		assertEquals("name1", persistence.get("hasIdentity", 1).getString("name"));
+		assertEquals("name2", persistence.get("hasIdentity", 2).getString("name"));
+	}
+	
 	private EntityPersistence createEntityPersistence(TestJdbcTemplate template) {
 		NameTranslator nameTranslator = new UpperCamelNameTranslator();
 		SelectHandlerSource selectHandlerSource = new SelectHandlerSourceImpl();
