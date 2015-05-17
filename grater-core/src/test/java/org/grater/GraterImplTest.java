@@ -8,6 +8,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import org.grater.jdbc.BlobTypeAnalyzer;
+import org.grater.jdbc.BlobTypeAnalyzerImpl;
 import org.grater.jdbc.InsertHandlerSource;
 import org.grater.jdbc.InsertHandlerSourceImpl;
 import org.grater.jdbc.JdbcEntityPersistence;
@@ -102,8 +104,9 @@ public class GraterImplTest {
 		NameTranslator nameTranslator = new UpperCamelNameTranslator();
 		EntitySchema schema = new JdbcEntitySchema(template, nameTranslator);
 		TypeCoercer typeCoercer = new TypeCoercerImpl(createTypeCoercerContributions());
-		SelectHandlerSource selectHandlerSource = new SelectHandlerSourceImpl();
-		InsertHandlerSource insertHandlerSource = new InsertHandlerSourceImpl();
+		BlobTypeAnalyzer blobAnalyzer = new BlobTypeAnalyzerImpl();
+		SelectHandlerSource selectHandlerSource = new SelectHandlerSourceImpl(blobAnalyzer);
+		InsertHandlerSource insertHandlerSource = new InsertHandlerSourceImpl(typeCoercer, blobAnalyzer);
 		EntityPersistence persistence = new JdbcEntityPersistence(schema, template, typeCoercer, nameTranslator, selectHandlerSource,
 				insertHandlerSource);
 		AutoGenerateSource autoGenerateSource = new AutoGenerateSourceImpl(schema, createAutoGenerateSourceContributions());

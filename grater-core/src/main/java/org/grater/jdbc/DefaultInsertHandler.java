@@ -1,12 +1,22 @@
 package org.grater.jdbc;
 
+import java.io.InputStream;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import org.grater.PropertyDef;
+import org.grater.TypeCoercer;
 
 public class DefaultInsertHandler implements InsertHandler {
+	private final BlobTypeAnalyzer blobAnalyzer;
+	private final TypeCoercer typeCoercer;
+	
+	public DefaultInsertHandler(TypeCoercer typeCoercer, BlobTypeAnalyzer blobAnalyzer) {
+		super();
+		this.typeCoercer = typeCoercer;
+		this.blobAnalyzer = blobAnalyzer;
+	}
 
 	@Override
 	public void onColumnsSql(StringBuilder columnsSql, boolean isFirst, PropertyDef propDef) {
@@ -26,7 +36,13 @@ public class DefaultInsertHandler implements InsertHandler {
 
 	@Override
 	public void onPreparedStatement(PreparedStatement ps, int index, PropertyDef propDef, Object value) throws SQLException {
-		ps.setObject(index, value);
+		if (value == null) {
+			ps.setNull(index, propDef.getSqlType());
+		} else if (blobAnalyzer.isBlob(propDef)) {
+			ps.setBlob(index, typeCoercer.coerce(value, InputStream.class));
+		} else {
+			ps.setObject(index, value);
+		}
 	}
 
 	@Override

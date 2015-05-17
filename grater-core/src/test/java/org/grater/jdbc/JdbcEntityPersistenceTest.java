@@ -1,9 +1,11 @@
 package org.grater.jdbc;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
+import java.util.List;
 
 import org.grater.Entity;
 import org.grater.EntityPersistence;
@@ -24,6 +26,13 @@ public class JdbcEntityPersistenceTest {
 	public void testIdentity() {
 		for (TestJdbcTemplate template : TestUtils.getTestJdbcTemplates()) {
 			testIdentity(template);
+		}
+	}
+
+	@Test
+	public void testBlob() {
+		for (TestJdbcTemplate template : TestUtils.getTestJdbcTemplates()) {
+			testBlob(template);
 		}
 	}
 	
@@ -56,19 +65,34 @@ public class JdbcEntityPersistenceTest {
 		assertEquals("name1", persistence.get("hasIdentity", 1).getString("name"));
 		assertEquals("name2", persistence.get("hasIdentity", 2).getString("name"));
 	}
+
+	private void testBlob(TestJdbcTemplate template) {
+		TestUtils.createTableHasBlob(template);
+		
+		EntityPersistence persistence = createEntityPersistence(template);
+		
+		byte[] bytes = "HEllOwORlD!!".getBytes();
+		Number pk = (Number) persistence.insert("hasBlob", TestUtils.createMap("id", 1, "binaryData", bytes));
+		assertEquals(1, pk.intValue());
+		
+		byte[] persistedBytes = persistence.get("hasBlob", 1).getValue("binaryData", byte[].class);
+		assertArrayEquals(bytes, persistedBytes);
+	}
 	
 	private EntityPersistence createEntityPersistence(TestJdbcTemplate template) {
-		NameTranslator nameTranslator = new UpperCamelNameTranslator();
-		SelectHandlerSource selectHandlerSource = new SelectHandlerSourceImpl();
-		InsertHandlerSource insertHandlerSource = new InsertHandlerSourceImpl();
 		TypeCoercer typeCoercer = new TypeCoercerImpl(createTypeCoercerContributions());
+		NameTranslator nameTranslator = new UpperCamelNameTranslator();
+		BlobTypeAnalyzer blobAnalyzer = new BlobTypeAnalyzerImpl();
+		SelectHandlerSource selectHandlerSource = new SelectHandlerSourceImpl(blobAnalyzer);
+		InsertHandlerSource insertHandlerSource = new InsertHandlerSourceImpl(typeCoercer, blobAnalyzer);
 		EntitySchema schema = new JdbcEntitySchema(template, nameTranslator);
 		EntityPersistence persistence = new JdbcEntityPersistence(schema, template, typeCoercer, nameTranslator, selectHandlerSource, insertHandlerSource);
 		return persistence;
 	}
 
 	private Collection<TypeCoercerContribution<?, ?>> createTypeCoercerContributions() {
-		return Collections.emptyList();
+		List<TypeCoercerContribution<?, ?>> contributions = new ArrayList<TypeCoercerContribution<?,?>>();
+		contributions.add(new ByteArrayInputStreamTypeCoercerContribution());
+		return contributions;
 	}
-
 }
