@@ -31,7 +31,7 @@ public class EntityImpl implements Entity {
 
 	@Override
 	public Entity getEntity(String propertyName) {
-		PropertyDef propDef = schema.getPropertyDef(propertyName, propertyName);
+		PropertyDef propDef = schema.getPropertyDef(entityName, propertyName);
 		if (!propDef.isForeignKey()) {
 			throw new RuntimeException(propertyName + " is not a foreign key");
 		}
@@ -55,5 +55,15 @@ public class EntityImpl implements Entity {
 	@Override
 	public String getString(String propertyName) {
 		return getValue(propertyName, String.class);
+	}
+	
+	@Override
+	public Long getLong(String propertyName) {
+		return getValue(propertyName, Long.class);
+	}
+	
+	@Override
+	public Integer getInteger(String propertyName) {
+		return getValue(propertyName, Integer.class);
 	}
 }

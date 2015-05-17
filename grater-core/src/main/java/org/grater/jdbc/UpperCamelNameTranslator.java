@@ -12,6 +12,11 @@ public class UpperCamelNameTranslator implements NameTranslator {
 		return upperToCamel(columnName);
 	}
 	
+	@Override
+	public String getEntityForTable(String tableName) {
+		return upperToCamel(tableName);
+	}
+	
 	private String upperToCamel(String upper) {
 		boolean nextIsUpper = false;
 		

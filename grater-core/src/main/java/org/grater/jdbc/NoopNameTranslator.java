@@ -11,4 +11,9 @@ public class NoopNameTranslator implements NameTranslator {
 	public String getPropertyForColumn(String tableName, String columnName) {
 		return columnName;
 	}
+	
+	@Override
+	public String getEntityForTable(String tableName) {
+		return tableName;
+	}
 }

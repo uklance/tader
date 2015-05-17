@@ -88,7 +88,7 @@ public class JdbcEntitySchema implements EntitySchema {
 				while (rs3.next()) {
 					String pkTable = rs3.getString("PKTABLE_NAME");
 					String fkColumn = rs3.getString("FKCOLUMN_NAME");
-					String foreignEntityName = nameTranslator.getTableForEntity(pkTable);
+					String foreignEntityName = nameTranslator.getEntityForTable(pkTable);
 					
 					PropertyDef propertyDef = propertyDefs.get(fkColumn);
 					propertyDef.setForeignKey(true);

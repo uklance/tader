@@ -36,7 +36,7 @@ public class JdbcEntityPersistence implements EntityPersistence {
 	}
 
 	@Override
-	public Entity insert(final String entityName, final Map<String, Object> values) {
+	public Object insert(final String entityName, final Map<String, Object> values) {
 		ConnectionCallback<Object> callback = new ConnectionCallback<Object>() {
 			@Override
 			public Object handle(Connection con) throws SQLException {
@@ -87,7 +87,7 @@ public class JdbcEntityPersistence implements EntityPersistence {
 			}
 		};
 		Object pk = jdbcTemplate.execute(callback);
-		return get(entityName, pk);
+		return pk;
 	}
 
 	@Override

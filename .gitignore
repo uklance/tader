@@ -1,7 +1,5 @@
-grater-core/target/
-grater-hibernate/target/
-grater-liquibase/target/
-grater-test/target/
+target/
+derby.log
 .settings/
 .classpath
 .project

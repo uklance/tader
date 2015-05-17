@@ -1,5 +1,5 @@
 package org.grater;
 
 public interface AutoGenerateStrategy {
-	Object generate(PropertyDef propertyDef, int increment);
+	Object generate(PropertyDef propDef, int increment);
 }
