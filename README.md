@@ -1,4 +1,4 @@
-![Tader](https://github.com/uklance/tader/raw/master/tader_110.png)
+![Tader](https://github.com/uklance/tader/raw/master/tader_250.png)
 
 Tader Test Data
 ---------------
