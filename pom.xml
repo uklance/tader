@@ -6,9 +6,9 @@
 	<artifactId>grater</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<packaging>pom</packaging>
-	<name>grater</name>
+	<name>tader</name>
 	
     <modules>
-        <module>grater-core</module>
+        <module>tader-core</module>
     </modules>
 </project>
