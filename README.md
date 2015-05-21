@@ -16,4 +16,10 @@ and free from the noise of populating uninteresting fields.
 Example
 -------
 
-At the moment the project documentation is poor. See [TaderImplTest.java](https://github.com/uklance/tader/blob/master/tader-core/src/test/java/org/tader/TaderImplTest.java) for usage.
+At the moment the project documentation is lacking, for sample usage see [TaderImplTest.java](https://github.com/uklance/tader/blob/master/tader-core/src/test/java/org/tader/TaderImplTest.java).
+
+
+TODO
+-----------
+* Develop a simple builder API which provides overridable defaults for all of the services
+* Documentation, documentation, documentation
