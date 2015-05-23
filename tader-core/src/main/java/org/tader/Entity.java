@@ -3,6 +3,7 @@ package org.tader;
 import java.util.Collection;
 
 public interface Entity {
+	String getName();
 	Collection<String> getPropertyNames();
 	Object getPrimaryKey();
 	Entity getEntity(String propertyName);

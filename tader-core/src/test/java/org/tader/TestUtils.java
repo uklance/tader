@@ -3,6 +3,7 @@ package org.tader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -41,7 +42,7 @@ public class TestUtils {
 		}
 		return templates;
 	}
-	
+
 	private static Properties loadProperties() {
 		String path = TestUtils.class.getName().replace(".", "/") + ".properties";
 		Properties props = new Properties();
@@ -64,7 +65,7 @@ public class TestUtils {
 	public static void createTableAuthor(ConnectionSource connectionSource) {
 		executePropertySql(connectionSource, "createTableAuthor");
 	}
-	
+
 	public static void createTableBook(TestJdbcTemplate template) {
 		executePropertySql(template, "createTableBook");
 	}
@@ -72,7 +73,7 @@ public class TestUtils {
 	public static void createTableBook(ConnectionSource connectionSource) {
 		executePropertySql(connectionSource, "createTableBook");
 	}
-	
+
 	public static void createTableHasIdentity(TestJdbcTemplate template) {
 		executePropertySql(template, "createTableHasIdentity");
 	}
@@ -105,7 +106,7 @@ public class TestUtils {
 		};
 		template.execute(callback);
 	}
-	
+
 	private static String getProperty(DatabaseVendor vendor, String propName) {
 		String value = getProperty(vendor.name() + "." + propName, true);
 		if (value == null) {
@@ -123,16 +124,32 @@ public class TestUtils {
 
 		return value;
 	}
-	
+
 	public static Map<String, Object> createMap(Object... keysAndValues) {
-		if (keysAndValues.length %2 != 0) {
+		if (keysAndValues.length % 2 != 0) {
 			throw new RuntimeException();
 		}
-		
+
 		Map<String, Object> map = new LinkedHashMap<String, Object>();
-		for (int i =0; i < keysAndValues.length; i+=2) {
-			map.put((String) keysAndValues[i], keysAndValues[i+1]);
+		for (int i = 0; i < keysAndValues.length; i += 2) {
+			map.put((String) keysAndValues[i], keysAndValues[i + 1]);
 		}
 		return map;
+	}
+
+	public static int getAuthorCount(JdbcTemplate template) {
+		return queryForInt(template, "SELECT COUNT(*) FROM AUTHOR");
+	}
+
+	public static int queryForInt(JdbcTemplate template, final String sql) {
+		ConnectionCallback<Integer> callback = new ConnectionCallback<Integer>() {
+			@Override
+			public Integer handle(Connection con) throws SQLException {
+				ResultSet rs = con.createStatement().executeQuery(sql);
+				rs.next();
+				return rs.getInt(1);
+			}
+		};
+		return template.execute(callback);
 	}
 }

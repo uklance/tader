@@ -1,6 +1,8 @@
 package org.tader;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -60,5 +62,19 @@ public class TaderImpl implements Tader {
 		
 		Object primaryKey = persistence.insert(entityName, resolvedValues);
 		return persistence.get(entityName, primaryKey);
+	}
+	
+	@Override
+	public List<Entity> insert(PartialEntity entity, int count) {
+		List<Entity> results = new ArrayList<Entity>(count);
+		for (int i = 0; i < count; ++i) {
+			results.add(insert(entity));
+		}
+		return results;
+	}
+	
+	@Override
+	public void delete(Entity entity) {
+		persistence.delete(entity.getName(), entity.getPrimaryKey());
 	}
 }

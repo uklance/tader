@@ -10,4 +10,5 @@ public interface EntityPersistence {
 	 */
 	Object insert(String entityName, Map<String, Object> values);
 	Entity get(String entityName, Object primaryKey);
+	void delete(String name, Object primaryKey);
 }

@@ -10,9 +10,9 @@ public interface SelectHandler {
 
 	void onColumnsSql(StringBuilder columnsSql, boolean isFirst, PropertyDef propDef);
 
-	void onWhereSql(StringBuilder whereSql, boolean isFirst, PropertyDef pkPropDef);
+	void onWhereSql(StringBuilder whereSql, boolean isFirst, PropertyDef propDef);
 
-	void onPreparedStatement(PreparedStatement ps, int index, PropertyDef pkPropDef, Object primaryKey) throws SQLException;
+	void onPreparedStatement(PreparedStatement ps, int index, PropertyDef propDef, Object value) throws SQLException;
 
 	Object getValue(ResultSet rs, int index, PropertyDef propDef) throws SQLException;
 

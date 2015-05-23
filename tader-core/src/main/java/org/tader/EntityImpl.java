@@ -66,4 +66,9 @@ public class EntityImpl implements Entity {
 	public Integer getInteger(String propertyName) {
 		return getValue(propertyName, Integer.class);
 	}
+	
+	@Override
+	public String getName() {
+		return entityName;
+	}
 }

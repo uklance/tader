@@ -46,15 +46,44 @@ public class TaderImplTest {
 		}
 	}
 	
+	@Test
+	public void testDelete() {
+		for (TestJdbcTemplate template : TestUtils.getTestJdbcTemplates()) {
+			testDelete(template);
+		}
+	}
+	
+	private void testDelete(TestJdbcTemplate template) {
+		TestUtils.createTableAuthor(template);
+		TestUtils.createTableBook(template);
+		
+		Tader tader = createTader(template);
+		
+		PartialEntity authorPartial = new PartialEntity("author");
+		
+		List<Entity> inserted = tader.insert(authorPartial, 3);
+		
+		assertEquals(3, TestUtils.getAuthorCount(template));
+		
+		tader.delete(inserted.get(0));
+		assertEquals(2, TestUtils.getAuthorCount(template));
+
+		tader.delete(inserted.get(1));
+		assertEquals(1, TestUtils.getAuthorCount(template));
+
+		tader.delete(inserted.get(2));
+		assertEquals(0, TestUtils.getAuthorCount(template));
+	}
+
 	private void testPartialDependency(TestJdbcTemplate template) {
 		TestUtils.createTableAuthor(template);
 		TestUtils.createTableBook(template);
 		
 		Tader tader = createTader(template);
 		
-		PartialEntity partialAuthor = new PartialEntity("author").withValue("authorName", "foo");
+		PartialEntity authorPartial = new PartialEntity("author").withValue("authorName", "foo");
 		
-		PartialEntity bookPartial = new PartialEntity("book").withValue("authorId", partialAuthor);
+		PartialEntity bookPartial = new PartialEntity("book").withValue("authorId", authorPartial);
 		
 		Entity book = tader.insert(bookPartial);
 		

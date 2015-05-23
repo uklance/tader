@@ -143,4 +143,30 @@ public class JdbcEntityPersistence implements EntityPersistence {
 		};
 		return jdbcTemplate.execute(callback);
 	}
+	
+	@Override
+	public void delete(final String entityName, final Object primaryKey) {
+		ConnectionCallback<Void> callback = new ConnectionCallback<Void>() {
+			@Override
+			public Void handle(Connection con) throws SQLException {
+				String table = nameTranslator.getTableForEntity(entityName);
+				StringBuilder whereSql = new StringBuilder();
+				PropertyDef propDef = schema.getPropertyDef(entityName, schema.getPrimaryKeyPropertyName(entityName));
+				SelectHandler selectHandler = selectHandlerSource.get(propDef);
+				selectHandler.onWhereSql(whereSql, true, propDef);
+				String sql = String.format("DELETE FROM %s WHERE %s", table, whereSql);
+				
+				PreparedStatement ps = con.prepareStatement(sql);
+				selectHandler.onPreparedStatement(ps, 1, propDef, primaryKey);
+				
+				int result = ps.executeUpdate();
+				
+				if (result != 1) {
+					throw new RuntimeException(result + " rows deleted, expected 1");
+				}
+				return null;
+			}
+		};
+		jdbcTemplate.execute(callback);
+	}
 }
