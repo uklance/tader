@@ -13,9 +13,9 @@ fields that were not specified will be generated, including foreign key records.
 and free from the noise of populating uninteresting fields.
 
 #### Example
-At the moment the project documentation is lacking, for sample usage see [TaderImplTest.java](https://github.com/uklance/tader/blob/master/tader-core/src/test/java/org/tader/TaderImplTest.java).
+At the moment the project documentation is lacking, for sample usage see [TaderBuilderTest.java](https://github.com/uklance/tader/blob/master/tader-core/src/test/java/org/tader/builder/TaderBuilderTest.java).
 
 
 #### TODO
-* Develop a simple builder API which provides overridable defaults for all of the services
+* Deploy artifacts to a maven repository
 * Documentation, documentation, documentation
