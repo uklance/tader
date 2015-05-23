@@ -24,20 +24,24 @@ public class TestUtils {
 
 	private static final Properties properties = loadProperties();
 
+	public static ConnectionSource newConnectionSource(DatabaseVendor vendor) {
+		String id = "TestUtils" + nextId.getAndIncrement();
+		String url = String.format(vendor.getUrlTemplate(), id);
+
+		return new SimpleConnectionSource(vendor.getClassName(), url);
+	}
+
 	public static List<TestJdbcTemplate> getTestJdbcTemplates() {
 		List<TestJdbcTemplate> templates = new ArrayList<TestJdbcTemplate>();
 		for (DatabaseVendor vendor : DatabaseVendor.values()) {
-			String id = "TestUtils" + nextId.getAndIncrement();
-			String url = String.format(vendor.getUrlTemplate(), id);
-
-			ConnectionSource connectionSource = new SimpleConnectionSource(vendor.getClassName(), url);
+			ConnectionSource connectionSource = newConnectionSource(vendor);
 			JdbcTemplate delegate = new JdbcTemplateImpl(connectionSource);
 
 			templates.add(new TestJdbcTemplate(vendor, delegate));
 		}
 		return templates;
 	}
-
+	
 	private static Properties loadProperties() {
 		String path = TestUtils.class.getName().replace(".", "/") + ".properties";
 		Properties props = new Properties();
@@ -57,10 +61,18 @@ public class TestUtils {
 		executePropertySql(template, "createTableAuthor");
 	}
 
+	public static void createTableAuthor(ConnectionSource connectionSource) {
+		executePropertySql(connectionSource, "createTableAuthor");
+	}
+	
 	public static void createTableBook(TestJdbcTemplate template) {
 		executePropertySql(template, "createTableBook");
 	}
 
+	public static void createTableBook(ConnectionSource connectionSource) {
+		executePropertySql(connectionSource, "createTableBook");
+	}
+	
 	public static void createTableHasIdentity(TestJdbcTemplate template) {
 		executePropertySql(template, "createTableHasIdentity");
 	}
@@ -81,22 +93,37 @@ public class TestUtils {
 		template.execute(callback);
 	}
 
-	private static String getProperty(DatabaseVendor vendor, String propName) {
-		String vendorProp = vendor.name() + "." + propName;
-
-		String value = properties.getProperty(vendorProp);
-
-		if (value == null) {
-			value = properties.getProperty(propName);
-
-			if (value == null) {
-				throw new RuntimeException("No such property " + vendorProp);
+	private static void executePropertySql(ConnectionSource connectionSource, String propName) {
+		JdbcTemplate template = new JdbcTemplateImpl(connectionSource);
+		final String sql = getProperty(propName, false);
+		ConnectionCallback<Void> callback = new ConnectionCallback<Void>() {
+			@Override
+			public Void handle(Connection con) throws SQLException {
+				con.createStatement().execute(sql);
+				return null;
 			}
+		};
+		template.execute(callback);
+	}
+	
+	private static String getProperty(DatabaseVendor vendor, String propName) {
+		String value = getProperty(vendor.name() + "." + propName, true);
+		if (value == null) {
+			return getProperty(propName, false);
+		}
+		return value;
+	}
+
+	private static String getProperty(String propName, boolean allowNull) {
+		String value = properties.getProperty(propName);
+
+		if (value == null && !allowNull) {
+			throw new RuntimeException("No such property " + propName);
 		}
 
 		return value;
 	}
-
+	
 	public static Map<String, Object> createMap(Object... keysAndValues) {
 		if (keysAndValues.length %2 != 0) {
 			throw new RuntimeException();

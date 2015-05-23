@@ -9,20 +9,6 @@ import java.util.Collections;
 import java.util.List;
 
 import org.junit.Test;
-import org.tader.AutoGenerateSource;
-import org.tader.AutoGenerateSourceContribution;
-import org.tader.AutoGenerateSourceImpl;
-import org.tader.AutoGenerateStrategy;
-import org.tader.DefaultStringAutoGenerateStrategy;
-import org.tader.Entity;
-import org.tader.EntityPersistence;
-import org.tader.EntitySchema;
-import org.tader.Tader;
-import org.tader.TaderImpl;
-import org.tader.IntegerLongTypeCoercerContribution;
-import org.tader.PartialEntity;
-import org.tader.PropertyDef;
-import org.tader.TypeCoercer;
 import org.tader.jdbc.BlobTypeAnalyzer;
 import org.tader.jdbc.BlobTypeAnalyzerImpl;
 import org.tader.jdbc.InsertHandlerSource;
@@ -127,8 +113,9 @@ public class TaderImplTest {
 		return new TaderImpl(schema, persistence, autoGenerateSource);
 	}
 
-	private Collection<TypeCoercerContribution<?, ?>> createTypeCoercerContributions() {
-		List<TypeCoercerContribution<?, ?>> contributions = new ArrayList<TypeCoercerContribution<?, ?>>();
+	@SuppressWarnings("rawtypes")
+	private Collection<TypeCoercerContribution> createTypeCoercerContributions() {
+		List<TypeCoercerContribution> contributions = new ArrayList<TypeCoercerContribution>();
 		contributions.add(new IntegerLongTypeCoercerContribution());
 		return contributions;
 	}

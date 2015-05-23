@@ -8,23 +8,12 @@ import java.util.Collection;
 import java.util.List;
 
 import org.junit.Test;
+import org.tader.ByteArrayInputStreamTypeCoercerContribution;
 import org.tader.Entity;
 import org.tader.EntityPersistence;
 import org.tader.EntitySchema;
 import org.tader.TestUtils;
 import org.tader.TypeCoercer;
-import org.tader.jdbc.BlobTypeAnalyzer;
-import org.tader.jdbc.BlobTypeAnalyzerImpl;
-import org.tader.jdbc.InsertHandlerSource;
-import org.tader.jdbc.InsertHandlerSourceImpl;
-import org.tader.jdbc.JdbcEntityPersistence;
-import org.tader.jdbc.JdbcEntitySchema;
-import org.tader.jdbc.NameTranslator;
-import org.tader.jdbc.SelectHandlerSource;
-import org.tader.jdbc.SelectHandlerSourceImpl;
-import org.tader.jdbc.TypeCoercerContribution;
-import org.tader.jdbc.TypeCoercerImpl;
-import org.tader.jdbc.UpperCamelNameTranslator;
 public class JdbcEntityPersistenceTest {
 
 	@Test
@@ -102,8 +91,9 @@ public class JdbcEntityPersistenceTest {
 		return persistence;
 	}
 
-	private Collection<TypeCoercerContribution<?, ?>> createTypeCoercerContributions() {
-		List<TypeCoercerContribution<?, ?>> contributions = new ArrayList<TypeCoercerContribution<?,?>>();
+	@SuppressWarnings("rawtypes")
+	private Collection<TypeCoercerContribution> createTypeCoercerContributions() {
+		List<TypeCoercerContribution> contributions = new ArrayList<TypeCoercerContribution>();
 		contributions.add(new ByteArrayInputStreamTypeCoercerContribution());
 		return contributions;
 	}

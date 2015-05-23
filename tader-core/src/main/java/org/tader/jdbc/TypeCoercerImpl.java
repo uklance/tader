@@ -10,7 +10,7 @@ import org.tader.TypeCoercer;
 public class TypeCoercerImpl implements TypeCoercer {
 	private final Map<String, TypeCoercerContribution> contributionMap;
 
-	public TypeCoercerImpl(Collection<TypeCoercerContribution<?, ?>> contributions) {
+	public TypeCoercerImpl(Collection<TypeCoercerContribution> contributions) {
 		contributionMap = new HashMap<String, TypeCoercerContribution>();
 		for (TypeCoercerContribution<?, ?> contribution : contributions) {
 			String key = createKey(contribution.getSourceType(), contribution.getTargetType());

@@ -1,4 +1,4 @@
-package org.tader.jdbc;
+package org.tader;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
