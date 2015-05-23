@@ -30,9 +30,16 @@ import org.tader.jdbc.SelectHandlerSourceImpl;
 import org.tader.jdbc.TypeCoercerContribution;
 import org.tader.jdbc.TypeCoercerImpl;
 
+/**
+ * A convenient way of instantiating a {@link Tader} instance via inversion of control.
+ */
 public class TaderBuilder {
 	private RegistryBuilder registryBuilder = new RegistryBuilder();
 	
+	/**
+	 * Registers services in the org.tader package
+	 * @return this GraterBuilder for further configuration
+	 */
 	public TaderBuilder withCoreServices() {
 		ServiceBuilder<AutoGenerateSource> autoGenBuilder = new ServiceBuilder<AutoGenerateSource>() {
 			@Override
@@ -53,6 +60,10 @@ public class TaderBuilder {
 		return this;
 	}
 	
+	/**
+	 * Registers services in the org.tader.jdbc package
+	 * @return this GraterBuilder for further configuration
+	 */
 	public TaderBuilder withCoreJdbcServices() {
 		registryBuilder.withServiceInstance(JdbcTemplate.class, JdbcTemplateImpl.class);
 		registryBuilder.withServiceInstance(NameTranslator.class, NoopNameTranslator.class);
@@ -64,12 +75,20 @@ public class TaderBuilder {
 		return this;
 	}
 	
+	/**
+	 * Adds core configuration for the {@link TypeCoercer}
+	 * @return this GraterBuilder for further configuration
+	 */
 	public TaderBuilder withCoreTypeCoercerContributions() {
 		registryBuilder.withContribution(TypeCoercer.class, new IntegerLongTypeCoercerContribution());
 		registryBuilder.withContribution(TypeCoercer.class, new ByteArrayInputStreamTypeCoercerContribution());
 		return this;
 	}
 	
+	/**
+	 * Adds core configuration for the {@link AutoGenerateSource}
+	 * @return this GraterBuilder for further configuration
+	 */
 	public TaderBuilder withCoreAutoGenerateSourceContributions() {
 		AutoGenerateSourceContribution contribution = new AutoGenerateSourceContribution() 
 			.withAutoGenerateStrategy(Types.VARCHAR, new DefaultStringAutoGenerateStrategy());
@@ -78,36 +97,77 @@ public class TaderBuilder {
 		return this;
 	}
 	
+	/**
+	 * Adds a service instance to the builder
+	 * @param serviceInterface The service interface
+	 * @param service The service instance
+	 * @return this GraterBuilder for further configuration
+	 */
 	public <I, T extends I> TaderBuilder withService(Class<I> serviceInterface, T service) {
 		registryBuilder.withService(serviceInterface, service);
 		return this;
 	}
 
+	/**
+	 * Convenience method to register a {@link ConnectionSource}
+	 * @param connectionSource The connection source
+	 * @return this GraterBuilder for further configuration
+	 */
 	public TaderBuilder withConnectionSource(ConnectionSource connectionSource) {
 		registryBuilder.withService(ConnectionSource.class, connectionSource);
 		return this;
 	}
 
+	/**
+	 * Adds a service builder to the builder
+	 * @param serviceInterface The service interface
+	 * @param builder Callback to instantiate a service instance
+	 * @return this GraterBuilder for further configuration
+	 */
 	public <T> TaderBuilder withServiceBuilder(Class<T> serviceInterface, ServiceBuilder<T> builder) {
 		registryBuilder.withServiceBuilder(serviceInterface, builder);
 		return this;
 	}
 
+	/**
+	 * Registers a service builder that will reflectively invoke the constructor of serviceType, passing any
+	 * services to it that match the constructor argument types
+	 * @param serviceInterface The service interface
+	 * @param serviceType The concrete service type
+	 * @return this GraterBuilder for further configuration
+	 */
 	public <I, T extends I> TaderBuilder withServiceInstance(Class<I> serviceInterface, Class<T> serviceType) {
 		registryBuilder.withServiceInstance(serviceInterface, serviceType);
 		return this;
 	}
 
+	/**
+	 * Registers a service contribution for a service. These will be aggregated together into a {@link Collection}
+	 * which can be accessed by {@link ServiceBuilder}s.
+	 * @param serviceInterface The service interface
+	 * @param contribution A single contribution entry which will be aggregated into a collection prior to building the service
+	 * @return this GraterBuilder for further configuration
+	 */
 	public TaderBuilder withContribution(Class<?> serviceInterface, Object contribution) {
 		registryBuilder.withContribution(serviceInterface, contribution);
 		return this;
 	}
 
+	/**
+	 * Sets a property on the builder. These properties are accessible to {@link ServiceBuilder}s
+	 * @param name The property name
+	 * @param value The property value
+	 * @return this GraterBuilder for further configuration
+	 */
 	public TaderBuilder withProperty(String name, String value) {
 		registryBuilder.withProperty(name, value);
 		return this;
 	}
-	
+
+	/**
+	 * Builds the service registry and returns the {@link Tader} service
+	 * @return A {@link Tader} instance
+	 */
 	public Tader build() {
 		return registryBuilder.build().getService(Tader.class);
 	}
