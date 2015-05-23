@@ -64,13 +64,13 @@ public class TaderImplTest {
 		TestUtils.createTableAuthor(template);
 		TestUtils.createTableBook(template);
 		
-		Tader grater = createGrater(template);
+		Tader tader = createTader(template);
 		
 		PartialEntity partialAuthor = new PartialEntity("author").withValue("authorName", "foo");
 		
 		PartialEntity bookPartial = new PartialEntity("book").withValue("authorId", partialAuthor);
 		
-		Entity book = grater.insert(bookPartial);
+		Entity book = tader.insert(bookPartial);
 		
 		Entity author = book.getEntity("authorId");
 		assertEquals(201, book.getInteger("bookId").intValue());
@@ -83,11 +83,11 @@ public class TaderImplTest {
 		TestUtils.createTableAuthor(template);
 		TestUtils.createTableBook(template);
 		
-		Tader grater = createGrater(template);
+		Tader tader = createTader(template);
 		
 		PartialEntity bookPartial = new PartialEntity("book");
 		
-		Entity book = grater.insert(bookPartial);
+		Entity book = tader.insert(bookPartial);
 		
 		Entity author = book.getEntity("authorId");
 		
@@ -100,21 +100,21 @@ public class TaderImplTest {
 		TestUtils.createTableAuthor(template);
 		TestUtils.createTableBook(template);
 		
-		Tader grater = createGrater(template);
+		Tader tader = createTader(template);
 		
-		Entity author1 = grater.insert(new PartialEntity("author"));
+		Entity author1 = tader.insert(new PartialEntity("author"));
 		assertEquals(101, author1.getInteger("authorId").intValue());
 
-		Entity author2 = grater.insert(new PartialEntity("author"));
+		Entity author2 = tader.insert(new PartialEntity("author"));
 		assertEquals(102, author2.getInteger("authorId").intValue());
 		
 		PartialEntity bookPartial = new PartialEntity("book").withValue("authorId", author2);
-		Entity book = grater.insert(bookPartial);
+		Entity book = tader.insert(bookPartial);
 		assertEquals(201, book.getInteger("bookId").intValue());
 		assertEquals(102, book.getEntity("authorId").getValue("authorId", Integer.class).intValue());
 	}
 
-	private Tader createGrater(TestJdbcTemplate template) {
+	private Tader createTader(TestJdbcTemplate template) {
 		NameTranslator nameTranslator = new UpperCamelNameTranslator();
 		EntitySchema schema = new JdbcEntitySchema(template, nameTranslator);
 		TypeCoercer typeCoercer = new TypeCoercerImpl(createTypeCoercerContributions());
