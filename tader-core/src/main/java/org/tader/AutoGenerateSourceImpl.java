@@ -61,7 +61,7 @@ public class AutoGenerateSourceImpl implements AutoGenerateSource {
 	public int getNextIncrement(String entityName) {
 		AtomicInteger nextIncrement = nextIncrementByEntity.get(entityName);
 		if (nextIncrement == null) {
-			AtomicInteger candidate = new AtomicInteger(1);
+			AtomicInteger candidate = new AtomicInteger(0);
 			AtomicInteger previous = nextIncrementByEntity.putIfAbsent(entityName, candidate);
 
 			nextIncrement = previous == null ? candidate : previous;

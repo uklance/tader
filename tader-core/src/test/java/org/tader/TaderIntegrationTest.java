@@ -55,10 +55,10 @@ public class TaderIntegrationTest {
 		Entity book = tader.insert(bookPartial);
 		
 		Entity author = book.getEntity("authorId");
-		assertEquals(201, book.getInteger("bookId").intValue());
+		assertEquals(200, book.getInteger("bookId").intValue());
 		
 		assertEquals("foo", author.getString("authorName"));
-		assertEquals(101, author.getInteger("authorId").intValue());
+		assertEquals(100, author.getInteger("authorId").intValue());
 	}
 
 	private void testImplicitDependency(ConnectionSource connectionSource) {
@@ -73,9 +73,9 @@ public class TaderIntegrationTest {
 		
 		Entity author = book.getEntity("authorId");
 		
-		assertEquals("authorName1", author.getString("authorName"));
-		assertEquals(101, author.getInteger("authorId").intValue());
-		assertEquals(101L, author.getLong("authorId").longValue());
+		assertEquals("authorName0", author.getString("authorName"));
+		assertEquals(100, author.getInteger("authorId").intValue());
+		assertEquals(100L, author.getLong("authorId").longValue());
 	}
 	
 	private void testExplicitDependency(ConnectionSource connectionSource) {
@@ -85,15 +85,15 @@ public class TaderIntegrationTest {
 		Tader tader = createTader(connectionSource);
 		
 		Entity author1 = tader.insert(new PartialEntity("author"));
-		assertEquals(101, author1.getInteger("authorId").intValue());
+		assertEquals(100, author1.getInteger("authorId").intValue());
 
 		Entity author2 = tader.insert(new PartialEntity("author"));
-		assertEquals(102, author2.getInteger("authorId").intValue());
+		assertEquals(101, author2.getInteger("authorId").intValue());
 		
 		PartialEntity bookPartial = new PartialEntity("book").withValue("authorId", author2);
 		Entity book = tader.insert(bookPartial);
-		assertEquals(201, book.getInteger("bookId").intValue());
-		assertEquals(102, book.getEntity("authorId").getValue("authorId", Integer.class).intValue());
+		assertEquals(200, book.getInteger("bookId").intValue());
+		assertEquals(101, book.getEntity("authorId").getValue("authorId", Integer.class).intValue());
 	}
 
 	private Tader createTader(ConnectionSource connectionSource) {
