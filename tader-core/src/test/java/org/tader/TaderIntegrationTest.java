@@ -1,4 +1,4 @@
-package org.tader.builder;
+package org.tader;
 
 import static org.junit.Assert.assertEquals;
 
@@ -10,7 +10,7 @@ import org.tader.Entity;
 import org.tader.PartialEntity;
 import org.tader.PropertyDef;
 import org.tader.Tader;
-import org.tader.TestUtils;
+import org.tader.builder.TaderBuilder;
 import org.tader.jdbc.ConnectionSource;
 import org.tader.jdbc.DatabaseVendor;
 import org.tader.jdbc.NameTranslator;
