@@ -16,7 +16,7 @@ import org.tader.jdbc.DatabaseVendor;
 import org.tader.jdbc.NameTranslator;
 import org.tader.jdbc.UpperCamelNameTranslator;
 
-public class TaderBuilderTest {
+public class TaderIntegrationTest {
 
 	@Test
 	public void testPartialDependency() {

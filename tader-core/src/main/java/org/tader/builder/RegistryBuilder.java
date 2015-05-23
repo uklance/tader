@@ -46,27 +46,27 @@ public class RegistryBuilder {
 	}
 
 	public Registry build() {
-		final ServiceBuilderContext context = createServiceBuilderContext();
+		final Map<Class, Object> proxies = new LinkedHashMap<Class, Object>();
 
 		return new Registry() {
-			public <T> T getService(Class<T> serviceInterface) {
-				return context.getService(serviceInterface);
-			}
-		};
-	}
-
-	private ServiceBuilderContext createServiceBuilderContext() {
-		final Map<Class, Object> proxies = new LinkedHashMap<Class, Object>();
-		return new ServiceBuilderContext() {
-
 			@Override
 			public <T> T getService(Class<T> serviceInterface) {
 				if (proxies.containsKey(serviceInterface)) {
 					return serviceInterface.cast(proxies.get(serviceInterface));
 				}
-				T proxy = createProxy(serviceInterface, this);
+				ServiceBuilderContext context = createServiceBuilderContext(serviceInterface, this);
+				T proxy = createProxy(serviceInterface, context);
 				proxies.put(serviceInterface, proxy);
 				return proxy;
+			}
+		};
+	}
+
+	private <I> ServiceBuilderContext createServiceBuilderContext(final Class<I> serviceInterface, final Registry registry) {
+		return new ServiceBuilderContext() {
+			@Override
+			public <T> T getService(Class<T> serviceInterface) {
+				return registry.getService(serviceInterface);
 			}
 
 			@Override
@@ -78,8 +78,8 @@ public class RegistryBuilder {
 			}
 
 			@Override
-			public <T> Collection<T> getContributions(Class<?> serviceType, Class<T> contributionType) {
-				Collection<T> contributions = (Collection<T>) contributionMap.get(serviceType);
+			public <T> Collection<T> getContributions(Class<T> contributionType) {
+				Collection<T> contributions = (Collection<T>) contributionMap.get(serviceInterface);
 				return contributions == null ? Collections.<T> emptyList() : contributions;
 			}
 		};

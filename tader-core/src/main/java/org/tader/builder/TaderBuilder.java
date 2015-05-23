@@ -44,14 +44,14 @@ public class TaderBuilder {
 		ServiceBuilder<AutoGenerateSource> autoGenBuilder = new ServiceBuilder<AutoGenerateSource>() {
 			@Override
 			public AutoGenerateSource build(ServiceBuilderContext context) {
-				Collection<AutoGenerateSourceContribution> contributions = context.getContributions(AutoGenerateSource.class, AutoGenerateSourceContribution.class);
+				Collection<AutoGenerateSourceContribution> contributions = context.getContributions(AutoGenerateSourceContribution.class);
 				return new AutoGenerateSourceImpl(context.getService(EntitySchema.class), contributions);
 			}
 		};
 		ServiceBuilder<TypeCoercer> typeCoerceBuilder = new ServiceBuilder<TypeCoercer>() {
 			@Override
 			public TypeCoercer build(ServiceBuilderContext context) {
-				return new TypeCoercerImpl(context.getContributions(TypeCoercer.class, TypeCoercerContribution.class));
+				return new TypeCoercerImpl(context.getContributions(TypeCoercerContribution.class));
 			}
 		};
 		registryBuilder.withServiceInstance(Tader.class, TaderImpl.class);
