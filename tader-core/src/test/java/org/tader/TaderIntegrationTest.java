@@ -2,14 +2,9 @@ package org.tader;
 
 import static org.junit.Assert.assertEquals;
 
+import java.util.List;
+
 import org.junit.Test;
-import org.tader.AutoGenerateSource;
-import org.tader.AutoGenerateSourceContribution;
-import org.tader.AutoGenerateStrategy;
-import org.tader.Entity;
-import org.tader.PartialEntity;
-import org.tader.PropertyDef;
-import org.tader.Tader;
 import org.tader.builder.TaderBuilder;
 import org.tader.jdbc.ConnectionSource;
 import org.tader.jdbc.DatabaseVendor;
@@ -17,40 +12,44 @@ import org.tader.jdbc.NameTranslator;
 import org.tader.jdbc.UpperCamelNameTranslator;
 
 public class TaderIntegrationTest {
-
 	@Test
 	public void testPartialDependency() {
 		for (DatabaseVendor vendor : DatabaseVendor.values()) {
-			ConnectionSource connectionSource = TestUtils.newConnectionSource(vendor);
-			testPartialDependency(connectionSource);
+			testPartialDependency(vendor);
 		}
 	}
 
 	@Test
 	public void testImplicitDependency() {
 		for (DatabaseVendor vendor : DatabaseVendor.values()) {
-			ConnectionSource connectionSource = TestUtils.newConnectionSource(vendor);
-			testImplicitDependency(connectionSource);
+			testImplicitDependency(vendor);
 		}
 	}
 
 	@Test
 	public void testExplicitDependency() {
 		for (DatabaseVendor vendor : DatabaseVendor.values()) {
-			ConnectionSource connectionSource = TestUtils.newConnectionSource(vendor);
-			testExplicitDependency(connectionSource);
+			testExplicitDependency(vendor);
 		}
 	}
 	
-	private void testPartialDependency(ConnectionSource connectionSource) {
+	@Test
+	public void testDelete() {
+		for (DatabaseVendor vendor : DatabaseVendor.values()) {
+			testDelete(vendor);
+		}
+	}
+	
+	private void testPartialDependency(DatabaseVendor vendor) {
+		ConnectionSource connectionSource = TestUtils.newConnectionSource(vendor);
 		TestUtils.createTableAuthor(connectionSource);
 		TestUtils.createTableBook(connectionSource);
 		
 		Tader tader = createTader(connectionSource);
 		
-		PartialEntity partialAuthor = new PartialEntity("author").withValue("authorName", "foo");
+		PartialEntity authorPartial = new PartialEntity("author").withValue("authorName", "foo");
 		
-		PartialEntity bookPartial = new PartialEntity("book").withValue("authorId", partialAuthor);
+		PartialEntity bookPartial = new PartialEntity("book").withValue("authorId", authorPartial);
 		
 		Entity book = tader.insert(bookPartial);
 		
@@ -61,7 +60,8 @@ public class TaderIntegrationTest {
 		assertEquals(100, author.getInteger("authorId").intValue());
 	}
 
-	private void testImplicitDependency(ConnectionSource connectionSource) {
+	private void testImplicitDependency(DatabaseVendor vendor) {
+		ConnectionSource connectionSource = TestUtils.newConnectionSource(vendor);
 		TestUtils.createTableAuthor(connectionSource);
 		TestUtils.createTableBook(connectionSource);
 		
@@ -78,7 +78,8 @@ public class TaderIntegrationTest {
 		assertEquals(100L, author.getLong("authorId").longValue());
 	}
 	
-	private void testExplicitDependency(ConnectionSource connectionSource) {
+	private void testExplicitDependency(DatabaseVendor vendor) {
+		ConnectionSource connectionSource = TestUtils.newConnectionSource(vendor);
 		TestUtils.createTableAuthor(connectionSource);
 		TestUtils.createTableBook(connectionSource);
 		
@@ -94,6 +95,29 @@ public class TaderIntegrationTest {
 		Entity book = tader.insert(bookPartial);
 		assertEquals(200, book.getInteger("bookId").intValue());
 		assertEquals(101, book.getEntity("authorId").getValue("authorId", Integer.class).intValue());
+	}
+
+	private void testDelete(DatabaseVendor vendor) {
+		ConnectionSource connectionSource = TestUtils.newConnectionSource(vendor);
+		TestUtils.createTableAuthor(connectionSource);
+		TestUtils.createTableBook(connectionSource);
+		
+		Tader tader = createTader(connectionSource);
+		
+		PartialEntity authorPartial = new PartialEntity("author");
+		
+		List<Entity> inserted = tader.insert(authorPartial, 3);
+		
+		assertEquals(3, TestUtils.getAuthorCount(connectionSource));
+		
+		tader.delete(inserted.get(0));
+		assertEquals(2, TestUtils.getAuthorCount(connectionSource));
+
+		tader.delete(inserted.get(1));
+		assertEquals(1, TestUtils.getAuthorCount(connectionSource));
+
+		tader.delete(inserted.get(2));
+		assertEquals(0, TestUtils.getAuthorCount(connectionSource));
 	}
 
 	private Tader createTader(ConnectionSource connectionSource) {

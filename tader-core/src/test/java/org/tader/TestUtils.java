@@ -137,8 +137,8 @@ public class TestUtils {
 		return map;
 	}
 
-	public static int getAuthorCount(JdbcTemplate template) {
-		return queryForInt(template, "SELECT COUNT(*) FROM AUTHOR");
+	public static int getAuthorCount(ConnectionSource connectionSource) {
+		return queryForInt(new JdbcTemplateImpl(connectionSource), "SELECT COUNT(*) FROM AUTHOR");
 	}
 
 	public static int queryForInt(JdbcTemplate template, final String sql) {
