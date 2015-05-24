@@ -96,10 +96,10 @@ public class TestUtils {
 	}
 
 	public static int getAuthorCount(ConnectionSource connectionSource) {
-		return queryForInt(new JdbcTemplateImpl(connectionSource), "SELECT COUNT(*) FROM AUTHOR");
+		return queryForInt(connectionSource, "SELECT COUNT(*) FROM AUTHOR");
 	}
 
-	public static int queryForInt(JdbcTemplate template, final String sql) {
+	public static int queryForInt(ConnectionSource connectionSource, final String sql) {
 		ConnectionCallback<Integer> callback = new ConnectionCallback<Integer>() {
 			@Override
 			public Integer handle(Connection con) throws SQLException {
@@ -108,17 +108,18 @@ public class TestUtils {
 				return rs.getInt(1);
 			}
 		};
+		JdbcTemplate template = new JdbcTemplateImpl(connectionSource);
 		return template.execute(callback);
 	}
 
 	public static int executeSql(ConnectionSource connectionSource, final String sql) {
-		JdbcTemplate template = new JdbcTemplateImpl(connectionSource);
 		ConnectionCallback<Integer> callback = new ConnectionCallback<Integer>() {
 			@Override
 			public Integer handle(Connection con) throws SQLException {
 				return con.createStatement().executeUpdate(sql);
 			}
 		};
+		JdbcTemplate template = new JdbcTemplateImpl(connectionSource);
 		return template.execute(callback);
 	}
 }
