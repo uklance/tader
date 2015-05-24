@@ -11,30 +11,29 @@ import org.junit.Test;
 import org.tader.EntitySchema;
 import org.tader.PropertyDef;
 import org.tader.TestUtils;
-import org.tader.jdbc.JdbcEntitySchema;
-import org.tader.jdbc.NameTranslator;
-import org.tader.jdbc.UpperCamelNameTranslator;
 
 public class JdbcEntitySchemaTest {
 	private static final Set<String> AUTHOR_COLUMN_NAMES = new HashSet<String>(Arrays.asList("AUTHOR_ID", "AUTHOR_NAME", "AUTHOR_HOBBY"));
 
 	@Test
 	public void testColumns() {
-		for (TestJdbcTemplate template : TestUtils.getTestJdbcTemplates()) {
-			testColumns(template);
+		for (DatabaseVendor vendor : DatabaseVendor.values()) {
+			testColumns(vendor);
 		}
 	}
 
-	private void testColumns(TestJdbcTemplate template) {
-		TestUtils.createTableAuthor(template);
+	private void testColumns(DatabaseVendor vendor) {
+		ConnectionSource connectionSource = TestUtils.newConnectionSource(vendor);
+		TestUtils.createTableAuthor(vendor, connectionSource);
 
-		EntitySchema schema = createEntitySchema(template);
+		EntitySchema schema = createEntitySchema(connectionSource);
 
 		assertEquals("authorId", schema.getPrimaryKeyPropertyName("author"));
 		assertColumnNames(AUTHOR_COLUMN_NAMES, schema.getPropertyDefs("author"));
 	}
 
-	private EntitySchema createEntitySchema(TestJdbcTemplate template) {
+	private EntitySchema createEntitySchema(ConnectionSource connectionSource) {
+		JdbcTemplate template = new JdbcTemplateImpl(connectionSource);
 		NameTranslator nameTranslator = new UpperCamelNameTranslator();
 		return new JdbcEntitySchema(template, nameTranslator);
 	}

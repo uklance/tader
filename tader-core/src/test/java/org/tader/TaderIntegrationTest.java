@@ -42,8 +42,8 @@ public class TaderIntegrationTest {
 	
 	private void testPartialDependency(DatabaseVendor vendor) {
 		ConnectionSource connectionSource = TestUtils.newConnectionSource(vendor);
-		TestUtils.createTableAuthor(connectionSource);
-		TestUtils.createTableBook(connectionSource);
+		TestUtils.createTableAuthor(vendor, connectionSource);
+		TestUtils.createTableBook(vendor, connectionSource);
 		
 		Tader tader = createTader(connectionSource);
 		
@@ -62,8 +62,8 @@ public class TaderIntegrationTest {
 
 	private void testImplicitDependency(DatabaseVendor vendor) {
 		ConnectionSource connectionSource = TestUtils.newConnectionSource(vendor);
-		TestUtils.createTableAuthor(connectionSource);
-		TestUtils.createTableBook(connectionSource);
+		TestUtils.createTableAuthor(vendor, connectionSource);
+		TestUtils.createTableBook(vendor, connectionSource);
 		
 		Tader tader = createTader(connectionSource);
 		
@@ -80,8 +80,8 @@ public class TaderIntegrationTest {
 	
 	private void testExplicitDependency(DatabaseVendor vendor) {
 		ConnectionSource connectionSource = TestUtils.newConnectionSource(vendor);
-		TestUtils.createTableAuthor(connectionSource);
-		TestUtils.createTableBook(connectionSource);
+		TestUtils.createTableAuthor(vendor, connectionSource);
+		TestUtils.createTableBook(vendor, connectionSource);
 		
 		Tader tader = createTader(connectionSource);
 		
@@ -99,8 +99,8 @@ public class TaderIntegrationTest {
 
 	private void testDelete(DatabaseVendor vendor) {
 		ConnectionSource connectionSource = TestUtils.newConnectionSource(vendor);
-		TestUtils.createTableAuthor(connectionSource);
-		TestUtils.createTableBook(connectionSource);
+		TestUtils.createTableAuthor(vendor, connectionSource);
+		TestUtils.createTableBook(vendor, connectionSource);
 		
 		Tader tader = createTader(connectionSource);
 		

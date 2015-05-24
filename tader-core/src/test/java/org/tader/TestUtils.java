@@ -5,9 +5,7 @@ import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -18,7 +16,6 @@ import org.tader.jdbc.DatabaseVendor;
 import org.tader.jdbc.JdbcTemplate;
 import org.tader.jdbc.JdbcTemplateImpl;
 import org.tader.jdbc.SimpleConnectionSource;
-import org.tader.jdbc.TestJdbcTemplate;
 
 public class TestUtils {
 	private static final AtomicInteger nextId = new AtomicInteger(0);
@@ -30,17 +27,6 @@ public class TestUtils {
 		String url = String.format(vendor.getUrlTemplate(), id);
 
 		return new SimpleConnectionSource(vendor.getClassName(), url);
-	}
-
-	public static List<TestJdbcTemplate> getTestJdbcTemplates() {
-		List<TestJdbcTemplate> templates = new ArrayList<TestJdbcTemplate>();
-		for (DatabaseVendor vendor : DatabaseVendor.values()) {
-			ConnectionSource connectionSource = newConnectionSource(vendor);
-			JdbcTemplate delegate = new JdbcTemplateImpl(connectionSource);
-
-			templates.add(new TestJdbcTemplate(vendor, delegate));
-		}
-		return templates;
 	}
 
 	private static Properties loadProperties() {
@@ -58,53 +44,25 @@ public class TestUtils {
 		return props;
 	}
 
-	public static void createTableAuthor(TestJdbcTemplate template) {
-		executePropertySql(template, "createTableAuthor");
+	public static void createTableAuthor(DatabaseVendor vendor, ConnectionSource connectionSource) {
+		executePropertySql(vendor, connectionSource, "createTableAuthor");
 	}
 
-	public static void createTableAuthor(ConnectionSource connectionSource) {
-		executePropertySql(connectionSource, "createTableAuthor");
+	public static void createTableBook(DatabaseVendor vendor, ConnectionSource connectionSource) {
+		executePropertySql(vendor, connectionSource, "createTableBook");
 	}
 
-	public static void createTableBook(TestJdbcTemplate template) {
-		executePropertySql(template, "createTableBook");
+	public static void createTableHasIdentity(DatabaseVendor vendor, ConnectionSource connectionSource) {
+		executePropertySql(vendor, connectionSource, "createTableHasIdentity");
 	}
 
-	public static void createTableBook(ConnectionSource connectionSource) {
-		executePropertySql(connectionSource, "createTableBook");
+	public static void createTableHasBlob(DatabaseVendor vendor, ConnectionSource connectionSource) {
+		executePropertySql(vendor, connectionSource, "createTableHasBlob");
 	}
 
-	public static void createTableHasIdentity(TestJdbcTemplate template) {
-		executePropertySql(template, "createTableHasIdentity");
-	}
-
-	public static void createTableHasBlob(TestJdbcTemplate template) {
-		executePropertySql(template, "createTableHasBlob");
-	}
-
-	private static void executePropertySql(TestJdbcTemplate template, String propName) {
-		final String sql = getProperty(template.getDatabaseVendor(), propName);
-		ConnectionCallback<Void> callback = new ConnectionCallback<Void>() {
-			@Override
-			public Void handle(Connection con) throws SQLException {
-				con.createStatement().execute(sql);
-				return null;
-			}
-		};
-		template.execute(callback);
-	}
-
-	private static void executePropertySql(ConnectionSource connectionSource, String propName) {
-		JdbcTemplate template = new JdbcTemplateImpl(connectionSource);
-		final String sql = getProperty(propName, false);
-		ConnectionCallback<Void> callback = new ConnectionCallback<Void>() {
-			@Override
-			public Void handle(Connection con) throws SQLException {
-				con.createStatement().execute(sql);
-				return null;
-			}
-		};
-		template.execute(callback);
+	private static void executePropertySql(DatabaseVendor vendor, ConnectionSource connectionSource, String propName) {
+		final String sql = getProperty(vendor, propName);
+		executeSql(connectionSource, sql);
 	}
 
 	private static String getProperty(DatabaseVendor vendor, String propName) {
@@ -148,6 +106,17 @@ public class TestUtils {
 				ResultSet rs = con.createStatement().executeQuery(sql);
 				rs.next();
 				return rs.getInt(1);
+			}
+		};
+		return template.execute(callback);
+	}
+
+	public static int executeSql(ConnectionSource connectionSource, final String sql) {
+		JdbcTemplate template = new JdbcTemplateImpl(connectionSource);
+		ConnectionCallback<Integer> callback = new ConnectionCallback<Integer>() {
+			@Override
+			public Integer handle(Connection con) throws SQLException {
+				return con.createStatement().executeUpdate(sql);
 			}
 		};
 		return template.execute(callback);
