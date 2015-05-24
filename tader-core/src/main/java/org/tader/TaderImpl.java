@@ -1,6 +1,7 @@
 package org.tader;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -76,5 +77,12 @@ public class TaderImpl implements Tader {
 	@Override
 	public void delete(Entity entity) {
 		persistence.delete(entity.getName(), entity.getPrimaryKey());
+	}
+	
+	@Override
+	public void delete(Collection<Entity> entities) {
+		for (Entity entity : entities) {
+			delete(entity);
+		}
 	}
 }
