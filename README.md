@@ -22,21 +22,20 @@ The simplest way to get an instance of Tader is via the TaderBuilder
 import org.tader.*;
 import org.tader.jdbc.*;
 
-...
-  ConnectionSource connectionSource = new SimpleConnectionSource(
-    "org.h2.Driver", 
-    "jdbc:h2:mem:%s;DB_CLOSE_DELAY=-1",
-    "user",
-    "password"
-  );
+ConnectionSource connectionSource = new SimpleConnectionSource(
+   "org.h2.Driver", 
+   "jdbc:h2:mem:%s;DB_CLOSE_DELAY=-1",
+   "user",
+   "password"
+);
 
-	Tader tader = new TaderBuilder()
-		.withCoreServices()
-		.withCoreJdbcServices()
-		.withCoreTypeCoercerContributions()
-		.withCoreAutoGenerateSourceContributions()
-		.withConnectionSource(connectionSource);
-		.build();
+Tader tader = new TaderBuilder()
+   .withCoreServices()
+   .withCoreJdbcServices()
+   .withCoreTypeCoercerContributions()
+   .withCoreAutoGenerateSourceContributions()
+   .withConnectionSource(connectionSource);
+   .build();
 ```
 
 #### Example
