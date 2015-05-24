@@ -12,9 +12,36 @@ It allows you to succintly generate test data by specifying only the fields you 
 fields that were not specified will be generated, including foreign key records. This leaves your test case succint
 and free from the noise of populating uninteresting fields.
 
-#### Example
-At the moment the project documentation is lacking, for sample usage see [TaderIntegrationTest.java](https://github.com/uklance/tader/blob/master/tader-core/src/test/java/org/tader/TaderIntegrationTest.java).
+#### Usage
 
+#### Instantiating a Tader service
+
+The simplest way to get an instance of Tader is via the TaderBuilder
+
+```java
+import org.tader.*;
+import org.tader.jdbc.*;
+
+...
+  ConnectionSource connectionSource = new SimpleConnectionSource(
+    "org.h2.Driver", 
+    "jdbc:h2:mem:%s;DB_CLOSE_DELAY=-1",
+    "user",
+    "password"
+  );
+
+	Tader tader = new TaderBuilder()
+		.withCoreServices()
+		.withCoreJdbcServices()
+		.withCoreTypeCoercerContributions()
+		.withCoreAutoGenerateSourceContributions()
+		.withConnectionSource(connectionSource);
+		.build();
+```
+
+#### Example
+
+Currently, the best example is  [TaderIntegrationTest.java](https://github.com/uklance/tader/blob/master/tader-core/src/test/java/org/tader/TaderIntegrationTest.java).
 
 #### TODO
 * Deploy artifacts to a maven repository
