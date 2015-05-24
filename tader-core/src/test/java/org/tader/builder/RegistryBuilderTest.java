@@ -159,8 +159,6 @@ public class RegistryBuilderTest {
 				.withServiceInstance(C.class, CImpl.class)
 				.build();
 
-		A a = registry.getService(A.class);
-		B b = registry.getService(B.class);
 		C c = registry.getService(C.class);
 
 		assertEquals(0, getInstanceCount(A.class));
@@ -173,13 +171,21 @@ public class RegistryBuilderTest {
 		assertEquals(0, getInstanceCount(B.class));
 		assertEquals(1, getInstanceCount(C.class));
 
-		assertEquals("BImpl.doB", b.doB());
+		assertEquals("BImpl.doB", c.doB());
 
 		assertEquals(0, getInstanceCount(A.class));
 		assertEquals(1, getInstanceCount(B.class));
 		assertEquals(1, getInstanceCount(C.class));
 
-		assertEquals("AImpl.doA", a.doA());
+		assertEquals("AImpl.doA", c.doA());
+
+		assertEquals(1, getInstanceCount(A.class));
+		assertEquals(1, getInstanceCount(B.class));
+		assertEquals(1, getInstanceCount(C.class));
+
+		assertEquals("AImpl.doA", c.doA());
+		assertEquals("BImpl.doB", c.doB());
+		assertEquals("CImpl.doC", c.doC());
 
 		assertEquals(1, getInstanceCount(A.class));
 		assertEquals(1, getInstanceCount(B.class));

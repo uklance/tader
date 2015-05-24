@@ -9,6 +9,9 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.atomic.AtomicReference;
 
 @SuppressWarnings({ "unchecked", "rawtypes" })
 public class RegistryBuilder {
@@ -46,18 +49,18 @@ public class RegistryBuilder {
 	}
 
 	public Registry build() {
-		final Map<Class, Object> proxies = new LinkedHashMap<Class, Object>();
+		final ConcurrentMap<Class, Object> serviceProxies = new ConcurrentHashMap<Class, Object>();
 
 		return new Registry() {
 			@Override
 			public <T> T getService(Class<T> serviceInterface) {
-				if (proxies.containsKey(serviceInterface)) {
-					return serviceInterface.cast(proxies.get(serviceInterface));
+				if (serviceProxies.containsKey(serviceInterface)) {
+					return serviceInterface.cast(serviceProxies.get(serviceInterface));
 				}
 				ServiceBuilderContext context = createServiceBuilderContext(serviceInterface, this);
-				T proxy = createProxy(serviceInterface, context);
-				proxies.put(serviceInterface, proxy);
-				return proxy;
+				T proxyCandidate = createProxy(serviceInterface, context);
+				T existingProxy = serviceInterface.cast(serviceProxies.putIfAbsent(serviceInterface, proxyCandidate));
+				return existingProxy == null ? proxyCandidate : existingProxy;
 			}
 		};
 	}
@@ -80,7 +83,7 @@ public class RegistryBuilder {
 			@Override
 			public <T> Collection<T> getContributions(Class<T> contributionType) {
 				Collection<T> contributions = (Collection<T>) contributionMap.get(serviceInterface);
-				return contributions == null ? Collections.<T> emptyList() : contributions;
+				return contributions == null ? Collections.<T> emptyList() : Collections.unmodifiableCollection(contributions);
 			}
 		};
 	}
@@ -90,17 +93,17 @@ public class RegistryBuilder {
 			throw new RuntimeException("No service builder registered for " + serviceInterface.getName());
 		}
 		final ServiceBuilder<T> builder = (ServiceBuilder<T>) serviceBuilders.get(serviceInterface);
-		final Object[] mutableInstance = new Object[] { null };
+		final AtomicReference<T> serviceReference = new AtomicReference<T>();
 		InvocationHandler handler = new InvocationHandler() {
 			@Override
 			public Object invoke(Object target, Method method, Object[] args) throws Throwable {
-				Object instance = mutableInstance[0];
-				if (instance == null) {
-					instance = builder.build(context);
-					mutableInstance[0] = instance;
+				T service = serviceReference.get();
+				if (service == null) {
+					service = builder.build(context);
+					serviceReference.compareAndSet(null, service);
 				}
 				try {
-					return method.invoke(instance, args);
+					return method.invoke(service, args);
 				} catch (InvocationTargetException e) {
 					throw e.getTargetException();
 				}
