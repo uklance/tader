@@ -13,14 +13,22 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicReference;
 
+/**
+ * A simple IOC registry builder.
+ * Note: The RegistryBuilder itself is not thread-safe, the resultant {@link Registry} is thread-safe once built
+ */
 @SuppressWarnings({ "unchecked", "rawtypes" })
 public class RegistryBuilder {
 	private Map<Class, ServiceBuilder> serviceBuilders = new LinkedHashMap<Class, ServiceBuilder>();
 	private Map<String, String> properties = new LinkedHashMap<String, String>();
 	private Map<Class, Collection<Object>> contributionMap = new LinkedHashMap<Class, Collection<Object>>();
 	private final ClassLoader classloader = RegistryBuilder.class.getClassLoader();
+	private boolean isBuilt = false;
 
 	public <T> RegistryBuilder withServiceBuilder(Class<T> serviceInterface, ServiceBuilder<T> builder) {
+		if (isBuilt) {
+			throw new IllegalStateException("Registry has already been built");
+		}
 		serviceBuilders.put(serviceInterface, builder);
 		return this;
 	}
@@ -34,6 +42,9 @@ public class RegistryBuilder {
 	}
 
 	public RegistryBuilder withContribution(Class serviceInterface, Object contribution) {
+		if (isBuilt) {
+			throw new IllegalStateException("Registry has already been built");
+		}
 		Collection<Object> collection = contributionMap.get(serviceInterface);
 		if (collection == null) {
 			collection = new ArrayList<Object>();
@@ -44,14 +55,20 @@ public class RegistryBuilder {
 	}
 
 	public RegistryBuilder withProperty(String name, String value) {
+		if (isBuilt) {
+			throw new IllegalStateException("Registry has already been built");
+		}
 		properties.put(name, value);
 		return this;
 	}
 
 	public Registry build() {
+		if (isBuilt) {
+			throw new IllegalStateException("Registry has already been built");
+		}
 		final ConcurrentMap<Class, Object> serviceProxies = new ConcurrentHashMap<Class, Object>();
 
-		return new Registry() {
+		Registry registry = new Registry() {
 			@Override
 			public <T> T getService(Class<T> serviceInterface) {
 				if (serviceProxies.containsKey(serviceInterface)) {
@@ -63,6 +80,8 @@ public class RegistryBuilder {
 				return existingProxy == null ? proxyCandidate : existingProxy;
 			}
 		};
+		isBuilt = true;
+		return registry;
 	}
 
 	private <I> ServiceBuilderContext createServiceBuilderContext(final Class<I> serviceInterface, final Registry registry) {

@@ -81,6 +81,9 @@ public class TaderBuilder {
 	 */
 	public TaderBuilder withCoreTypeCoercerContributions() {
 		registryBuilder.withContribution(TypeCoercer.class, new IntegerLongTypeCoercerContribution());
+		registryBuilder.withContribution(TypeCoercer.class, new LongIntegerTypeCoercerContribution());
+		registryBuilder.withContribution(TypeCoercer.class, new DoubleBigDecimalTypeCoercerContribution());
+		registryBuilder.withContribution(TypeCoercer.class, new BigDecimalDoubleTypeCoercerContribution());
 		registryBuilder.withContribution(TypeCoercer.class, new ByteArrayInputStreamTypeCoercerContribution());
 		return this;
 	}
@@ -169,6 +172,10 @@ public class TaderBuilder {
 	 * @return A {@link Tader} instance
 	 */
 	public Tader build() {
-		return registryBuilder.build().getService(Tader.class);
+		return buildRegistry().getService(Tader.class);
+	}
+
+	protected Registry buildRegistry() {
+		return registryBuilder.build();
 	}
 }
