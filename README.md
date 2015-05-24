@@ -12,7 +12,7 @@ It allows you to succintly generate test data by specifying only the fields you 
 fields that were not specified will be generated, including foreign key records. This leaves your test case succint
 and free from the noise of populating uninteresting fields.
 
-#### Instantiating a Tader service
+#### Instantiating Tader
 
 The simplest way to get an instance of Tader is via the TaderBuilder
 
