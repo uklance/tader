@@ -19,6 +19,7 @@ The simplest way to get an instance of Tader is via the TaderBuilder
 ```java
 import org.tader.*;
 import org.tader.jdbc.*;
+import org.tader.builder.*;
 
 ConnectionSource connectionSource = new SimpleConnectionSource(
    "org.h2.Driver", 
