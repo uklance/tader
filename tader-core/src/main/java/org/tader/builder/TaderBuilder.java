@@ -23,6 +23,8 @@ import org.tader.Tader;
 import org.tader.TaderImpl;
 import org.tader.TimestampDateTypeCoercerContribution;
 import org.tader.TypeCoercer;
+import org.tader.TypeCoercerContribution;
+import org.tader.TypeCoercerImpl;
 import org.tader.jdbc.BlobTypeAnalyzer;
 import org.tader.jdbc.BlobTypeAnalyzerImpl;
 import org.tader.jdbc.ConnectionSource;
@@ -36,8 +38,6 @@ import org.tader.jdbc.NameTranslator;
 import org.tader.jdbc.NoopNameTranslator;
 import org.tader.jdbc.SelectHandlerSource;
 import org.tader.jdbc.SelectHandlerSourceImpl;
-import org.tader.jdbc.TypeCoercerContribution;
-import org.tader.jdbc.TypeCoercerImpl;
 
 /**
  * A convenient way of instantiating a {@link Tader} instance via inversion of control.

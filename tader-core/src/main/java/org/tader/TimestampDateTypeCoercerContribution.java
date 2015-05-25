@@ -3,7 +3,6 @@ package org.tader;
 import java.sql.Timestamp;
 import java.util.Date;
 
-import org.tader.jdbc.TypeCoercerContribution;
 
 public class TimestampDateTypeCoercerContribution extends TypeCoercerContribution<Timestamp, Date> {
 	public TimestampDateTypeCoercerContribution() {

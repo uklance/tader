@@ -1,10 +1,9 @@
-package org.tader.jdbc;
+package org.tader;
 
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.tader.TypeCoercer;
 
 @SuppressWarnings({ "rawtypes", "unchecked" })
 public class TypeCoercerImpl implements TypeCoercer {

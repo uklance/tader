@@ -2,7 +2,6 @@ package org.tader;
 
 import java.math.BigDecimal;
 
-import org.tader.jdbc.TypeCoercerContribution;
 
 public class DoubleBigDecimalTypeCoercerContribution extends TypeCoercerContribution<Double, BigDecimal> {
 

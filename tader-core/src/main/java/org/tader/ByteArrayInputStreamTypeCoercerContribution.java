@@ -3,7 +3,6 @@ package org.tader;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 
-import org.tader.jdbc.TypeCoercerContribution;
 
 public class ByteArrayInputStreamTypeCoercerContribution extends TypeCoercerContribution<byte[], InputStream> {
 	public ByteArrayInputStreamTypeCoercerContribution() {

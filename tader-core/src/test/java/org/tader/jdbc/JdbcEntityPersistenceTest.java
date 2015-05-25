@@ -14,6 +14,8 @@ import org.tader.EntityPersistence;
 import org.tader.EntitySchema;
 import org.tader.TestUtils;
 import org.tader.TypeCoercer;
+import org.tader.TypeCoercerContribution;
+import org.tader.TypeCoercerImpl;
 public class JdbcEntityPersistenceTest {
 
 	@Test

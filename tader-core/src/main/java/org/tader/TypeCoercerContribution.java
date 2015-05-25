@@ -1,4 +1,4 @@
-package org.tader.jdbc;
+package org.tader;
 
 public abstract class TypeCoercerContribution<S, T> {
 	private final Class<S> sourceType;

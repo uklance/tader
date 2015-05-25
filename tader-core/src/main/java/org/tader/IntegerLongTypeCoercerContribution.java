@@ -1,6 +1,5 @@
 package org.tader;
 
-import org.tader.jdbc.TypeCoercerContribution;
 
 public class IntegerLongTypeCoercerContribution extends TypeCoercerContribution<Integer, Long> {
 	public IntegerLongTypeCoercerContribution() {
