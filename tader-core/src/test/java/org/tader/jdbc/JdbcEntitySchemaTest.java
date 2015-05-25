@@ -2,6 +2,7 @@ package org.tader.jdbc;
 
 import static org.junit.Assert.assertEquals;
 
+import java.sql.Types;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
@@ -22,6 +23,13 @@ public class JdbcEntitySchemaTest {
 		}
 	}
 
+	@Test
+	public void testDecimal() {
+		for (DatabaseVendor vendor : DatabaseVendor.values()) {
+			testDecimal(vendor);
+		}
+	}
+	
 	private void testColumns(DatabaseVendor vendor) {
 		ConnectionSource connectionSource = TestUtils.newConnectionSource(vendor);
 		TestUtils.createTableAuthor(vendor, connectionSource);
@@ -32,6 +40,19 @@ public class JdbcEntitySchemaTest {
 		assertColumnNames(AUTHOR_COLUMN_NAMES, schema.getPropertyDefs("author"));
 	}
 
+	private void testDecimal(DatabaseVendor vendor) {
+		ConnectionSource connectionSource = TestUtils.newConnectionSource(vendor);
+		TestUtils.createTableHasAllTypes(vendor, connectionSource);
+
+		EntitySchema schema = createEntitySchema(connectionSource);
+		PropertyDef propDef = schema.getPropertyDef("hasAllTypes", "decimalRequired");
+		assertEquals(Types.DECIMAL, propDef.getSqlType());
+		assertEquals(2, propDef.getDecimalDigits());
+		
+		PropertyDef idDef = schema.getPropertyDef("hasAllTypes", "id");
+		assertEquals(0, idDef.getDecimalDigits());
+	}
+	
 	private EntitySchema createEntitySchema(ConnectionSource connectionSource) {
 		JdbcTemplate template = new JdbcTemplateImpl(connectionSource);
 		NameTranslator nameTranslator = new UpperCamelNameTranslator();

@@ -82,6 +82,8 @@ public class TaderBuilderTest {
 		assertNullColumn(entities, "dateNullable");
 		assertColumn(entities, "timestampRequired", Date.class, expectedDates.toArray());
 		assertNullColumn(entities, "timestampNullable");
+		assertColumn(entities, "decimalRequired", BigDecimal.class, new BigDecimal("0.00"), new BigDecimal("1.00"), new BigDecimal("2.00"));
+		assertNullColumn(entities, "decimalNullable");
 	}
 
 	private void assertNullColumn(List<Entity> entities, String propertyName) {

@@ -8,6 +8,7 @@ import org.tader.AutoGenerateSourceContribution;
 import org.tader.AutoGenerateSourceImpl;
 import org.tader.BigDecimalDoubleTypeCoercerContribution;
 import org.tader.ByteArrayInputStreamTypeCoercerContribution;
+import org.tader.DefaultBigDecimalAutoGenerateStrategy;
 import org.tader.DefaultBlobAutoGenerateStrategy;
 import org.tader.DefaultDateAutoGenerateStrategy;
 import org.tader.DefaultIntegerAutoGenerateStrategy;
@@ -106,6 +107,7 @@ public class TaderBuilder {
 		AutoGenerateSourceContribution contribution = new AutoGenerateSourceContribution() 
 			.withAutoGenerateStrategy(Types.VARCHAR, new DefaultStringAutoGenerateStrategy())
 			.withAutoGenerateStrategy(Types.INTEGER, new DefaultIntegerAutoGenerateStrategy())
+			.withAutoGenerateStrategy(Types.DECIMAL, new DefaultBigDecimalAutoGenerateStrategy())
 			.withAutoGenerateStrategy(Types.DATE, new DefaultDateAutoGenerateStrategy())
 			.withAutoGenerateStrategy(Types.TIMESTAMP, new DefaultDateAutoGenerateStrategy())
 			.withAutoGenerateStrategy(Types.BLOB, new DefaultBlobAutoGenerateStrategy());

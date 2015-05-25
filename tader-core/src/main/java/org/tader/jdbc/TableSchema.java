@@ -48,7 +48,7 @@ public class TableSchema {
 	public PropertyDef getPropertyDef(String propertyName) {
 		PropertyDef propDef = propertyDefs.get(propertyName);
 		if (propDef == null) {
-			throw new RuntimeException(String.format("No such property %s.%s", entityName, propertyName));
+			throw new RuntimeException(String.format("No such property %s.%s %s", entityName, propertyName, propertyDefs.keySet()));
 		}
 		return propDef;
 	}
