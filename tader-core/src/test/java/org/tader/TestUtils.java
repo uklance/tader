@@ -47,7 +47,11 @@ public class TestUtils {
 	public static void createTableAuthor(DatabaseVendor vendor, ConnectionSource connectionSource) {
 		executePropertySql(vendor, connectionSource, "createTableAuthor");
 	}
-
+	
+	public static void createTableHasAllTypes(DatabaseVendor vendor, ConnectionSource connectionSource) {
+		executePropertySql(vendor, connectionSource, "createTableHasAllTypes");
+	}
+	
 	public static void createTableBook(DatabaseVendor vendor, ConnectionSource connectionSource) {
 		executePropertySql(vendor, connectionSource, "createTableBook");
 	}

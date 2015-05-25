@@ -50,6 +50,9 @@ public class DefaultSelectHandler implements SelectHandler {
 
 	protected Object getByteArray(ResultSet rs, int index) throws SQLException {
 		InputStream in = rs.getBinaryStream(index);
+		if (in == null) {
+			return null;
+		}
 		try {
 			byte[] bytes = new byte[1024];
 			int count;

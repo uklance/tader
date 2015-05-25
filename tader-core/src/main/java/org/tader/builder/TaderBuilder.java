@@ -6,11 +6,18 @@ import java.util.Collection;
 import org.tader.AutoGenerateSource;
 import org.tader.AutoGenerateSourceContribution;
 import org.tader.AutoGenerateSourceImpl;
+import org.tader.BigDecimalDoubleTypeCoercerContribution;
 import org.tader.ByteArrayInputStreamTypeCoercerContribution;
+import org.tader.DefaultBlobAutoGenerateStrategy;
+import org.tader.DefaultDateAutoGenerateStrategy;
+import org.tader.DefaultIntegerAutoGenerateStrategy;
 import org.tader.DefaultStringAutoGenerateStrategy;
+import org.tader.DoubleBigDecimalTypeCoercerContribution;
 import org.tader.EntityPersistence;
 import org.tader.EntitySchema;
 import org.tader.IntegerLongTypeCoercerContribution;
+import org.tader.LongIntegerTypeCoercerContribution;
+import org.tader.SqlDateUtilDateTypeCoercerContribution;
 import org.tader.Tader;
 import org.tader.TaderImpl;
 import org.tader.TypeCoercer;
@@ -85,6 +92,7 @@ public class TaderBuilder {
 		registryBuilder.withContribution(TypeCoercer.class, new DoubleBigDecimalTypeCoercerContribution());
 		registryBuilder.withContribution(TypeCoercer.class, new BigDecimalDoubleTypeCoercerContribution());
 		registryBuilder.withContribution(TypeCoercer.class, new ByteArrayInputStreamTypeCoercerContribution());
+		registryBuilder.withContribution(TypeCoercer.class, new SqlDateUtilDateTypeCoercerContribution());
 		return this;
 	}
 	
@@ -94,7 +102,10 @@ public class TaderBuilder {
 	 */
 	public TaderBuilder withCoreAutoGenerateSourceContributions() {
 		AutoGenerateSourceContribution contribution = new AutoGenerateSourceContribution() 
-			.withAutoGenerateStrategy(Types.VARCHAR, new DefaultStringAutoGenerateStrategy());
+			.withAutoGenerateStrategy(Types.VARCHAR, new DefaultStringAutoGenerateStrategy())
+			.withAutoGenerateStrategy(Types.INTEGER, new DefaultIntegerAutoGenerateStrategy())
+			.withAutoGenerateStrategy(Types.DATE, new DefaultDateAutoGenerateStrategy())
+			.withAutoGenerateStrategy(Types.BLOB, new DefaultBlobAutoGenerateStrategy());
 
 		registryBuilder.withContribution(AutoGenerateSource.class, contribution);
 		return this;

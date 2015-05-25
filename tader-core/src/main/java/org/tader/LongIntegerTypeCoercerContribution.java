@@ -1,4 +1,4 @@
-package org.tader.builder;
+package org.tader;
 
 import org.tader.jdbc.TypeCoercerContribution;
 

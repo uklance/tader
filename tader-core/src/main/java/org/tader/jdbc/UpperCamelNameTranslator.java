@@ -1,5 +1,9 @@
 package org.tader.jdbc;
 
+/**
+ * This NameTranslator will allow you to use 'tableName' instead of 'TABLE_NAME' 
+ * and 'columnName' instead of 'COLUMN_NAME' in your Tader tests. 
+ */
 public class UpperCamelNameTranslator implements NameTranslator {
 
 	@Override
