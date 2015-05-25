@@ -1,6 +1,6 @@
 ![Tader](https://github.com/uklance/tader/raw/master/tader_250.png)
 
-Tader Test Data [![Build Status](https://travis-ci.org/uklance/tader.svg?branch=master)](https://travis-ci.org/uklance/tader) [![Coverage Status](https://coveralls.io/repos/uklance/tader/badge.svg)](https://coveralls.io/r/uklance/tader)
+Tader Test Data [![Build Status](https://travis-ci.org/uklance/tader.svg?branch=master)](https://travis-ci.org/uklance/tader) [![Coverage Status](https://coveralls.io/repos/uklance/tader/badge.svg?branch=master)](https://coveralls.io/r/uklance/tader?branch=master)
 ---------------
 
 Tader helps with generating test data prior to testing DAO's, stored procedures or any other service that requires
