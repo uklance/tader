@@ -1,6 +1,6 @@
 ![Tader](https://github.com/uklance/tader/raw/master/tader_250.png)
 
-Tader Test Data
+Tader Test Data ![Build Status](https://travis-ci.org/uklance/tader.svg?branch=master)
 ---------------
 
 Tader helps with generating test data prior to testing DAO's, stored procedures or any other service that requires
