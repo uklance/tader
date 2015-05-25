@@ -23,7 +23,7 @@ import org.tader.builder.*;
 
 ConnectionSource connectionSource = new SimpleConnectionSource(
    "org.h2.Driver", 
-   "jdbc:h2:mem:%s;DB_CLOSE_DELAY=-1",
+   "jdbc:h2:mem:test;DB_CLOSE_DELAY=-1",
    "user",
    "password"
 );
