@@ -162,7 +162,7 @@ public class TaderIntegrationTest {
 		cal.add(Calendar.DATE, 1);
 		expectedDates.add(cal.getTime());
 		
-		assertColumn(entities, "id", Integer.class, 0, 1, 2, 99);
+		assertColumn(entities, "id", Integer.class, 0, 1, 2);
 		assertColumn(entities, "intRequired", Integer.class, 0, 1, 2);
 		assertNullColumn(entities, "intNullable");
 		assertColumn(entities, "varcharRequired", String.class, "varcharRequired0", "varcharRequired1", "varcharRequired2");
