@@ -1,114 +1,31 @@
 package org.tader;
 
-public class PropertyDef {
-	private final String entityName;
-	private final String tableName;
-	private final String propertyName;
-	private final String columnName;
-	private int sqlType;
-	private int columnSize;
-	private int decimalDigits;
-	private boolean nullable;
-	private boolean autoIncrement;
-	private boolean generated;
-	private boolean primaryKey;
-	private boolean foreignKey;
-	private String foreignEntityName;
+public interface PropertyDef {
 
-	public PropertyDef(String entityName, String tableName, String propertyName, String columnName) {
-		super();
-		this.entityName = entityName;
-		this.tableName = tableName;
-		this.propertyName = propertyName;
-		this.columnName = columnName;
-	}
+	public int getColumnSize();
 
+	public int getDecimalDigits();
 
-	public int getColumnSize() {
-		return columnSize;
-	}
+	public boolean isNullable();
 
-	public void setColumnSize(int columnSize) {
-		this.columnSize = columnSize;
-	}
+	public boolean isAutoIncrement();
 
-	public int getDecimalDigits() {
-		return decimalDigits;
-	}
+	public boolean isGenerated();
 
-	public void setDecimalDigits(int decimalDigits) {
-		this.decimalDigits = decimalDigits;
-	}
+	public String getEntityName();
 
-	public boolean isNullable() {
-		return nullable;
-	}
+	public String getTableName();
 
-	public void setNullable(boolean nullable) {
-		this.nullable = nullable;
-	}
+	public String getPropertyName();
 
-	public boolean isAutoIncrement() {
-		return autoIncrement;
-	}
+	public String getColumnName();
 
-	public void setAutoIncrement(boolean autoIncrement) {
-		this.autoIncrement = autoIncrement;
-	}
+	public int getSqlType();
 
-	public boolean isGenerated() {
-		return generated;
-	}
+	public boolean isPrimaryKey();
 
-	public void setGenerated(boolean generated) {
-		this.generated = generated;
-	}
+	public String getForeignEntityName();
 
-	public String getEntityName() {
-		return entityName;
-	}
+	public boolean isForeignKey();
 
-	public String getTableName() {
-		return tableName;
-	}
-
-	public String getPropertyName() {
-		return propertyName;
-	}
-
-	public String getColumnName() {
-		return columnName;
-	}
-
-	public int getSqlType() {
-		return sqlType;
-	}
-
-	public void setSqlType(int sqlType) {
-		this.sqlType = sqlType;
-	}
-	
-	public void setPrimaryKey(boolean primaryKey) {
-		this.primaryKey = primaryKey;
-	}
-	
-	public boolean isPrimaryKey() {
-		return primaryKey;
-	}
-	
-	public void setForeignKey(boolean foreignKey) {
-		this.foreignKey = foreignKey;
-	}
-	
-	public String getForeignEntityName() {
-		return foreignEntityName;
-	}
-	
-	public void setForeignEntityName(String foreignEntityName) {
-		this.foreignEntityName = foreignEntityName;
-	}
-	
-	public boolean isForeignKey() {
-		return foreignKey;
-	}
 }

@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.tader.EntitySchema;
+import org.tader.MutablePropertyDef;
 import org.tader.PropertyDef;
 
 public class JdbcEntitySchema implements EntitySchema {
@@ -54,13 +55,13 @@ public class JdbcEntitySchema implements EntitySchema {
 				DatabaseMetaData meta = con.getMetaData();
 
 				String tableName = nameTranslator.getTableForEntity(entityName);
-				Map<String, PropertyDef> propertyDefs = new LinkedHashMap<String, PropertyDef>();
+				Map<String, MutablePropertyDef> propertyDefs = new LinkedHashMap<String, MutablePropertyDef>();
 				ResultSet rs1 = meta.getColumns(null, null, tableName, null);
 				while (rs1.next()) {
 					String columnName = rs1.getString("COLUMN_NAME");
 					String propertyName = nameTranslator.getPropertyForColumn(tableName, columnName);
 
-					PropertyDef propertyDef = new PropertyDef(entityName, tableName, propertyName, columnName);
+					MutablePropertyDef propertyDef = new MutablePropertyDef(entityName, tableName, propertyName, columnName);
 
 					propertyDef.setSqlType(rs1.getInt("DATA_TYPE"));
 					propertyDef.setColumnSize(rs1.getInt("COLUMN_SIZE"));
@@ -79,7 +80,7 @@ public class JdbcEntitySchema implements EntitySchema {
 				ResultSet rs2 = meta.getPrimaryKeys(null, null, tableName);
 				while (rs2.next()) {
 					String columnName = rs2.getString("COLUMN_NAME");
-					PropertyDef propertyDef = propertyDefs.get(columnName);
+					MutablePropertyDef propertyDef = propertyDefs.get(columnName);
 					propertyDef.setPrimaryKey(true);
 				}
 				rs2.close();
@@ -90,7 +91,7 @@ public class JdbcEntitySchema implements EntitySchema {
 					String fkColumn = rs3.getString("FKCOLUMN_NAME");
 					String foreignEntityName = nameTranslator.getEntityForTable(pkTable);
 					
-					PropertyDef propertyDef = propertyDefs.get(fkColumn);
+					MutablePropertyDef propertyDef = propertyDefs.get(fkColumn);
 					propertyDef.setForeignKey(true);
 					propertyDef.setForeignEntityName(foreignEntityName);
 				}

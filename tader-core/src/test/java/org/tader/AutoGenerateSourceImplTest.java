@@ -19,11 +19,11 @@ public class AutoGenerateSourceImplTest {
 		
 		AutoGenerateSource autoGenSource = new AutoGenerateSourceImpl(schema, Collections.<AutoGenerateSourceContribution>emptyList());
 		
-		PropertyDef propDef1 = new PropertyDef("someEntity", "someTable", "prop1", "column1");
-		PropertyDef propDef2 = new PropertyDef("someEntity", "someTable", "prop2", "column2");
-		PropertyDef propDef3 = new PropertyDef("someEntity", "someTable", "prop3", "column3");
+		MutablePropertyDef propDef1 = new MutablePropertyDef("someEntity", "someTable", "prop1", "column1");
+		MutablePropertyDef propDef2 = new MutablePropertyDef("someEntity", "someTable", "prop2", "column2");
+		MutablePropertyDef propDef3 = new MutablePropertyDef("someEntity", "someTable", "prop3", "column3");
 
-		when(schema.getPropertyDefs("someEntity")).thenReturn(Arrays.asList(propDef1, propDef2, propDef3));
+		when(schema.getPropertyDefs("someEntity")).thenReturn(Arrays.<PropertyDef> asList(propDef1, propDef2, propDef3));
 
 		assertSet(autoGenSource.getAutoGeneratePropertyNames("someEntity"), "prop1", "prop2", "prop3");
 		

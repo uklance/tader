@@ -14,7 +14,7 @@ public class TableSchema {
 	private final Map<String, PropertyDef> propertyDefs;
 	private final String primaryKeyPropertyName;
 
-	public TableSchema(String entityName, Collection<PropertyDef> propDefs) {
+	public TableSchema(String entityName, Collection<? extends PropertyDef> propDefs) {
 		Map<String, PropertyDef> map = new LinkedHashMap<String, PropertyDef>(propDefs.size());
 		List<String> pkPropNames = new ArrayList<String>();
 		for (PropertyDef propertyDef : propDefs) {
