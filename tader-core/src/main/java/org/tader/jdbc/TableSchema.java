@@ -12,6 +12,7 @@ import org.tader.PropertyDef;
 public class TableSchema {
 	private final String entityName;
 	private final Map<String, PropertyDef> propertyDefs;
+	private final int pkColumnCount;
 	private final String primaryKeyPropertyName;
 
 	public TableSchema(String entityName, Collection<? extends PropertyDef> propDefs) {
@@ -23,12 +24,10 @@ public class TableSchema {
 			}
 			map.put(propertyDef.getPropertyName(), propertyDef);
 		}
-		if (pkPropNames.size() != 1) {
-			throw new RuntimeException(String.format("Found %s primary key columns for %s, expecting 1", pkPropNames.size(), entityName));
-		}
 		this.entityName = entityName;
 		this.propertyDefs = Collections.unmodifiableMap(map);
-		this.primaryKeyPropertyName = pkPropNames.get(0);
+		this.pkColumnCount = pkPropNames.size();
+		this.primaryKeyPropertyName = (pkColumnCount == 1) ? pkPropNames.get(0) : null;
 	}
 
 	public Collection<PropertyDef> getPropertyDefs() {
@@ -36,6 +35,9 @@ public class TableSchema {
 	}
 
 	public String getPrimaryKeyPropertyName() {
+		if (pkColumnCount != 1) {
+			throw new RuntimeException(String.format("Found %s primary key columns for %s, expecting 1", pkColumnCount, entityName));
+		}
 		return primaryKeyPropertyName;
 	}
 
