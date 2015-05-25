@@ -80,18 +80,8 @@ public class TaderBuilderTest {
 		assertNullColumn(entities, "blobNullable");
 		assertColumn(entities, "dateRequired", Date.class, expectedDates.toArray());
 		assertNullColumn(entities, "dateNullable");
-		
-/*
-	ID int not null,\
-	INT_NULLABLE int,\
-	INT_REQUIRED int not null,\
-	VARCHAR_NULLABLE varchar(255),\
-	VARCHAR_REQUIRED varchar(255) not null,\
-	DATE_NULLABLE date,\
-	DATE_REQUIRED date not null,\
-	BLOB_NULLABLE blob,\
-	BLOB_REQUIRED blob not null,\
- */
+		assertColumn(entities, "timestampRequired", Date.class, expectedDates.toArray());
+		assertNullColumn(entities, "timestampNullable");
 	}
 
 	private void assertNullColumn(List<Entity> entities, String propertyName) {

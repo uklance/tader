@@ -20,6 +20,7 @@ import org.tader.LongIntegerTypeCoercerContribution;
 import org.tader.SqlDateUtilDateTypeCoercerContribution;
 import org.tader.Tader;
 import org.tader.TaderImpl;
+import org.tader.TimestampDateTypeCoercerContribution;
 import org.tader.TypeCoercer;
 import org.tader.jdbc.BlobTypeAnalyzer;
 import org.tader.jdbc.BlobTypeAnalyzerImpl;
@@ -93,6 +94,7 @@ public class TaderBuilder {
 		registryBuilder.withContribution(TypeCoercer.class, new BigDecimalDoubleTypeCoercerContribution());
 		registryBuilder.withContribution(TypeCoercer.class, new ByteArrayInputStreamTypeCoercerContribution());
 		registryBuilder.withContribution(TypeCoercer.class, new SqlDateUtilDateTypeCoercerContribution());
+		registryBuilder.withContribution(TypeCoercer.class, new TimestampDateTypeCoercerContribution());
 		return this;
 	}
 	
@@ -105,6 +107,7 @@ public class TaderBuilder {
 			.withAutoGenerateStrategy(Types.VARCHAR, new DefaultStringAutoGenerateStrategy())
 			.withAutoGenerateStrategy(Types.INTEGER, new DefaultIntegerAutoGenerateStrategy())
 			.withAutoGenerateStrategy(Types.DATE, new DefaultDateAutoGenerateStrategy())
+			.withAutoGenerateStrategy(Types.TIMESTAMP, new DefaultDateAutoGenerateStrategy())
 			.withAutoGenerateStrategy(Types.BLOB, new DefaultBlobAutoGenerateStrategy());
 
 		registryBuilder.withContribution(AutoGenerateSource.class, contribution);

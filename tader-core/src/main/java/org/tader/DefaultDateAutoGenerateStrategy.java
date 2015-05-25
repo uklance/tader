@@ -17,7 +17,14 @@ public class DefaultDateAutoGenerateStrategy implements AutoGenerateStrategy {
 	}
 	
 	public DefaultDateAutoGenerateStrategy() {
-		this(new Date(), 1, Calendar.DATE);
+		Calendar cal = Calendar.getInstance();
+		cal.set(Calendar.HOUR, 0);
+		cal.set(Calendar.MINUTE, 0);
+		cal.set(Calendar.SECOND, 0);
+		cal.set(Calendar.MILLISECOND, 0);
+		this.startsFrom = cal.getTime();
+		this.incrementBy = 1;
+		this.calendarField = Calendar.DATE;
 	}
 
 	@Override
