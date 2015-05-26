@@ -1,4 +1,6 @@
-package org.tader;
+package org.tader.coercer;
+
+import org.tader.TypeCoercerContribution;
 
 
 public class IntegerLongTypeCoercerContribution extends TypeCoercerContribution<Integer, Long> {

@@ -1,6 +1,9 @@
-package org.tader;
+package org.tader.autogen;
 
 import java.math.BigDecimal;
+
+import org.tader.AutoGenerateStrategy;
+import org.tader.PropertyDef;
 
 public class DefaultBigDecimalAutoGenerateStrategy implements AutoGenerateStrategy {
 	private final BigDecimal startsAt;

@@ -6,25 +6,25 @@ import java.util.Collection;
 import org.tader.AutoGenerateSource;
 import org.tader.AutoGenerateSourceContribution;
 import org.tader.AutoGenerateSourceImpl;
-import org.tader.BigDecimalDoubleTypeCoercerContribution;
-import org.tader.ByteArrayInputStreamTypeCoercerContribution;
-import org.tader.DefaultBigDecimalAutoGenerateStrategy;
-import org.tader.DefaultBlobAutoGenerateStrategy;
-import org.tader.DefaultDateAutoGenerateStrategy;
-import org.tader.DefaultIntegerAutoGenerateStrategy;
-import org.tader.DefaultStringAutoGenerateStrategy;
-import org.tader.DoubleBigDecimalTypeCoercerContribution;
 import org.tader.EntityPersistence;
 import org.tader.EntitySchema;
-import org.tader.IntegerLongTypeCoercerContribution;
-import org.tader.LongIntegerTypeCoercerContribution;
-import org.tader.SqlDateUtilDateTypeCoercerContribution;
 import org.tader.Tader;
 import org.tader.TaderImpl;
-import org.tader.TimestampDateTypeCoercerContribution;
 import org.tader.TypeCoercer;
 import org.tader.TypeCoercerContribution;
 import org.tader.TypeCoercerImpl;
+import org.tader.autogen.DefaultBigDecimalAutoGenerateStrategy;
+import org.tader.autogen.DefaultBlobAutoGenerateStrategy;
+import org.tader.autogen.DefaultDateAutoGenerateStrategy;
+import org.tader.autogen.DefaultIntegerAutoGenerateStrategy;
+import org.tader.autogen.DefaultStringAutoGenerateStrategy;
+import org.tader.coercer.BigDecimalDoubleTypeCoercerContribution;
+import org.tader.coercer.ByteArrayInputStreamTypeCoercerContribution;
+import org.tader.coercer.DoubleBigDecimalTypeCoercerContribution;
+import org.tader.coercer.IntegerLongTypeCoercerContribution;
+import org.tader.coercer.LongIntegerTypeCoercerContribution;
+import org.tader.coercer.SqlDateUtilDateTypeCoercerContribution;
+import org.tader.coercer.TimestampDateTypeCoercerContribution;
 import org.tader.jdbc.BlobTypeAnalyzer;
 import org.tader.jdbc.BlobTypeAnalyzerImpl;
 import org.tader.jdbc.ConnectionSource;
@@ -63,9 +63,9 @@ public class TaderBuilder {
 				return new TypeCoercerImpl(context.getContributions(TypeCoercerContribution.class));
 			}
 		};
-		registryBuilder.withServiceInstance(Tader.class, TaderImpl.class);
-		registryBuilder.withServiceBuilder(AutoGenerateSource.class, autoGenBuilder);
-		registryBuilder.withServiceBuilder(TypeCoercer.class, typeCoerceBuilder);
+		withServiceInstance(Tader.class, TaderImpl.class);
+		withServiceBuilder(AutoGenerateSource.class, autoGenBuilder);
+		withServiceBuilder(TypeCoercer.class, typeCoerceBuilder);
 		return this;
 	}
 	
@@ -74,13 +74,13 @@ public class TaderBuilder {
 	 * @return this TaderBuilder for further configuration
 	 */
 	public TaderBuilder withCoreJdbcServices() {
-		registryBuilder.withServiceInstance(JdbcTemplate.class, JdbcTemplateImpl.class);
-		registryBuilder.withServiceInstance(NameTranslator.class, NoopNameTranslator.class);
-		registryBuilder.withServiceInstance(EntitySchema.class, JdbcEntitySchema.class);
-		registryBuilder.withServiceInstance(EntityPersistence.class, JdbcEntityPersistence.class);
-		registryBuilder.withServiceInstance(BlobTypeAnalyzer.class, BlobTypeAnalyzerImpl.class);
-		registryBuilder.withServiceInstance(SelectHandlerSource.class, SelectHandlerSourceImpl.class);
-		registryBuilder.withServiceInstance(InsertHandlerSource.class, InsertHandlerSourceImpl.class);
+		withServiceInstance(JdbcTemplate.class, JdbcTemplateImpl.class);
+		withServiceInstance(NameTranslator.class, NoopNameTranslator.class);
+		withServiceInstance(EntitySchema.class, JdbcEntitySchema.class);
+		withServiceInstance(EntityPersistence.class, JdbcEntityPersistence.class);
+		withServiceInstance(BlobTypeAnalyzer.class, BlobTypeAnalyzerImpl.class);
+		withServiceInstance(SelectHandlerSource.class, SelectHandlerSourceImpl.class);
+		withServiceInstance(InsertHandlerSource.class, InsertHandlerSourceImpl.class);
 		return this;
 	}
 	
@@ -89,13 +89,13 @@ public class TaderBuilder {
 	 * @return this TaderBuilder for further configuration
 	 */
 	public TaderBuilder withCoreTypeCoercerContributions() {
-		registryBuilder.withContribution(TypeCoercer.class, new IntegerLongTypeCoercerContribution());
-		registryBuilder.withContribution(TypeCoercer.class, new LongIntegerTypeCoercerContribution());
-		registryBuilder.withContribution(TypeCoercer.class, new DoubleBigDecimalTypeCoercerContribution());
-		registryBuilder.withContribution(TypeCoercer.class, new BigDecimalDoubleTypeCoercerContribution());
-		registryBuilder.withContribution(TypeCoercer.class, new ByteArrayInputStreamTypeCoercerContribution());
-		registryBuilder.withContribution(TypeCoercer.class, new SqlDateUtilDateTypeCoercerContribution());
-		registryBuilder.withContribution(TypeCoercer.class, new TimestampDateTypeCoercerContribution());
+		withContribution(TypeCoercer.class, new IntegerLongTypeCoercerContribution());
+		withContribution(TypeCoercer.class, new LongIntegerTypeCoercerContribution());
+		withContribution(TypeCoercer.class, new DoubleBigDecimalTypeCoercerContribution());
+		withContribution(TypeCoercer.class, new BigDecimalDoubleTypeCoercerContribution());
+		withContribution(TypeCoercer.class, new ByteArrayInputStreamTypeCoercerContribution());
+		withContribution(TypeCoercer.class, new SqlDateUtilDateTypeCoercerContribution());
+		withContribution(TypeCoercer.class, new TimestampDateTypeCoercerContribution());
 		return this;
 	}
 	
@@ -112,7 +112,7 @@ public class TaderBuilder {
 			.withAutoGenerateStrategy(Types.TIMESTAMP, new DefaultDateAutoGenerateStrategy())
 			.withAutoGenerateStrategy(Types.BLOB, new DefaultBlobAutoGenerateStrategy());
 
-		registryBuilder.withContribution(AutoGenerateSource.class, contribution);
+		withContribution(AutoGenerateSource.class, contribution);
 		return this;
 	}
 	

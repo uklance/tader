@@ -1,4 +1,7 @@
-package org.tader;
+package org.tader.autogen;
+
+import org.tader.AutoGenerateStrategy;
+import org.tader.PropertyDef;
 
 
 public class DefaultBlobAutoGenerateStrategy implements AutoGenerateStrategy {

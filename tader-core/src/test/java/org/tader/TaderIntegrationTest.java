@@ -12,6 +12,7 @@ import java.util.Date;
 import java.util.List;
 
 import org.junit.Test;
+import org.tader.autogen.DefaultIntegerAutoGenerateStrategy;
 import org.tader.builder.TaderBuilder;
 import org.tader.jdbc.ConnectionSource;
 import org.tader.jdbc.DatabaseVendor;
@@ -192,18 +193,8 @@ public class TaderIntegrationTest {
 
 	private AutoGenerateSourceContribution createAutoGenerateSourceContribution() {
 		
-		AutoGenerateStrategy countFromOneHundred = new AutoGenerateStrategy() {
-			@Override
-			public Object generate(PropertyDef propDef, int increment) {
-				return 100 + increment;
-			}
-		};
-		AutoGenerateStrategy countFromTwoHundred = new AutoGenerateStrategy() {
-			@Override
-			public Object generate(PropertyDef propDef, int increment) {
-				return 200 + increment;
-			}
-		};
+		AutoGenerateStrategy countFromOneHundred = new DefaultIntegerAutoGenerateStrategy(100, 1);
+		AutoGenerateStrategy countFromTwoHundred = new DefaultIntegerAutoGenerateStrategy(200, 1);
 		
 		AutoGenerateSourceContribution contribution = new AutoGenerateSourceContribution()
 			.withAutoGenerateStrategy("author", "authorId", countFromOneHundred)

@@ -8,7 +8,6 @@ import java.util.Collection;
 import java.util.List;
 
 import org.junit.Test;
-import org.tader.ByteArrayInputStreamTypeCoercerContribution;
 import org.tader.Entity;
 import org.tader.EntityPersistence;
 import org.tader.EntitySchema;
@@ -16,6 +15,7 @@ import org.tader.TestUtils;
 import org.tader.TypeCoercer;
 import org.tader.TypeCoercerContribution;
 import org.tader.TypeCoercerImpl;
+import org.tader.coercer.ByteArrayInputStreamTypeCoercerContribution;
 public class JdbcEntityPersistenceTest {
 
 	@Test

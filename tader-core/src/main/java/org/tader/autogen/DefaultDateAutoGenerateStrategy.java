@@ -1,7 +1,10 @@
-package org.tader;
+package org.tader.autogen;
 
 import java.util.Calendar;
 import java.util.Date;
+
+import org.tader.AutoGenerateStrategy;
+import org.tader.PropertyDef;
 
 
 public class DefaultDateAutoGenerateStrategy implements AutoGenerateStrategy {

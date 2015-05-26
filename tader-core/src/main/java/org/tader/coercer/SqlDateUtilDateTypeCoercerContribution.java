@@ -1,6 +1,8 @@
-package org.tader;
+package org.tader.coercer;
 
 import java.util.Date;
+
+import org.tader.TypeCoercerContribution;
 
 
 public class SqlDateUtilDateTypeCoercerContribution extends TypeCoercerContribution<java.sql.Date, java.util.Date> {
