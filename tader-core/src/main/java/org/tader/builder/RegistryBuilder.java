@@ -118,8 +118,9 @@ public class RegistryBuilder {
 			public Object invoke(Object target, Method method, Object[] args) throws Throwable {
 				T service = serviceReference.get();
 				if (service == null) {
-					service = builder.build(context);
-					serviceReference.compareAndSet(null, service);
+					T candidate = builder.build(context);
+					serviceReference.compareAndSet(null, candidate);
+					service = serviceReference.get();
 				}
 				try {
 					return method.invoke(service, args);

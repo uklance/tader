@@ -8,10 +8,10 @@ public interface Tader {
 	 * Inserts the partial entity into the persistent store via {@link EntityPersistence}. Any required values will be
 	 * generated via the {@link AutoGenerateSource} 
 	 *
-	 * @see {@link EntityPersistence}
-	 * @see {@link AutoGenerateSource}
-	 * @see {@link AutoGenerateStrategy}
-	 * @see {@link AutoGenerateSourceContribution}
+	 * @see EntityPersistence
+	 * @see AutoGenerateSource
+	 * @see AutoGenerateStrategy
+	 * @see AutoGenerateSourceContribution
 	 * 
 	 * @param entity A partial entity to be inserted into the persistent store
 	 * @return A persisted entity
@@ -21,10 +21,10 @@ public interface Tader {
 	/**
 	 * Bulk insert operation to use a single template to insert multiple records
 	 * 
-	 * @see {@link EntityPersistence}
-	 * @see {@link AutoGenerateSource}
-	 * @see {@link AutoGenerateStrategy}
-	 * @see {@link AutoGenerateSourceContribution}
+	 * @see EntityPersistence
+	 * @see AutoGenerateSource
+	 * @see AutoGenerateStrategy
+	 * @see AutoGenerateSourceContribution
 	 * 
 	 * @param entity A partial entity template to be inserted into the persistent store
 	 * @param count Number of insert operations to perform

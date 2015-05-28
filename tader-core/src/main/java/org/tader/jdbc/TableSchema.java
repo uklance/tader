@@ -41,10 +41,6 @@ public class TableSchema {
 		return primaryKeyPropertyName;
 	}
 
-	public String getEntityName() {
-		return entityName;
-	}
-
 	public PropertyDef getPropertyDef(String propertyName) {
 		PropertyDef propDef = propertyDefs.get(propertyName);
 		if (propDef == null) {
