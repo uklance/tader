@@ -248,6 +248,10 @@ public class RegistryBuilderTest {
 			builder.withProperty("p2", "v2");
 			fail();
 		} catch (RuntimeException e) {}
+		try {
+			builder.build();
+			fail();
+		} catch (RuntimeException e) {}
 	}
 
 	@SuppressWarnings("unchecked")
