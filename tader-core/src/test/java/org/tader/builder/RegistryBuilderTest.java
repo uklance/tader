@@ -1,12 +1,17 @@
 package org.tader.builder;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.tader.TestUtils;
 
 @SuppressWarnings({ "rawtypes" })
 public class RegistryBuilderTest {
@@ -221,5 +226,38 @@ public class RegistryBuilderTest {
 		assertEquals(1, getInstanceCount(Circular1.class));
 		assertEquals(1, getInstanceCount(Circular2.class));
 
+	}
+	
+	@Test
+	public void testBuildOnce() {
+		RegistryBuilder builder = new RegistryBuilder()
+			.withServiceInstance(A.class, AImpl.class)
+			.withProperty("p1", "v1");
+		
+		Registry registry = builder.build();
+		assertNotNull(registry);
+		try {
+			builder.withService(List.class, new ArrayList());
+			fail();
+		} catch (RuntimeException e) {}
+		try {
+			builder.withServiceInstance(B.class, BImpl.class);
+			fail();
+		} catch (RuntimeException e) {}
+		try {
+			builder.withProperty("p2", "v2");
+			fail();
+		} catch (RuntimeException e) {}
+	}
+
+	@SuppressWarnings("unchecked")
+	@Test
+	public void testGetServiceInterfaces() {
+		Registry registry = new RegistryBuilder()
+			.withServiceInstance(A.class, AImpl.class)
+			.withServiceInstance(B.class, BImpl.class)
+			.build();
+		
+		assertEquals(TestUtils.newHashSet(A.class, B.class), registry.getServiceInterfaces());
 	}
 }

@@ -9,6 +9,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicReference;
@@ -78,6 +79,11 @@ public class RegistryBuilder {
 				T proxyCandidate = createProxy(serviceInterface, context);
 				T existingProxy = serviceInterface.cast(serviceProxies.putIfAbsent(serviceInterface, proxyCandidate));
 				return existingProxy == null ? proxyCandidate : existingProxy;
+			}
+			
+			@Override
+			public Set<Class> getServiceInterfaces() {
+				return Collections.unmodifiableSet(serviceBuilders.keySet());
 			}
 		};
 		isBuilt = true;

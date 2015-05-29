@@ -5,9 +5,12 @@ import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.tader.jdbc.ConnectionCallback;
@@ -125,5 +128,9 @@ public class TestUtils {
 		};
 		JdbcTemplate template = new JdbcTemplateImpl(connectionSource);
 		return template.execute(callback);
+	}
+
+	public static <T> Set<T> newHashSet(T... values) {
+		return new HashSet<T>(Arrays.asList(values));
 	}
 }
