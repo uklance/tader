@@ -14,6 +14,7 @@ public class AutoGenerateSourceImpl implements AutoGenerateSource {
 	private final EntitySchema schema;
 	private final Map<String, Map<String, AutoGenerateStrategy>> strategiesByEntityByProperty = new LinkedHashMap<String, Map<String, AutoGenerateStrategy>>();
 	private final Map<Integer, AutoGenerateStrategy> strategiesBySqlType = new LinkedHashMap<Integer, AutoGenerateStrategy>();
+	private final boolean generateForNullable;
 
 	private static final AutoGenerateStrategy FOREIGN_KEY_STRATEGY = new AutoGenerateStrategy() {
 		@Override
@@ -22,9 +23,10 @@ public class AutoGenerateSourceImpl implements AutoGenerateSource {
 		}
 	};
 
-	public AutoGenerateSourceImpl(EntitySchema schema, Collection<AutoGenerateSourceContribution> contributions) {
+	public AutoGenerateSourceImpl(EntitySchema schema, Collection<AutoGenerateSourceContribution> contributions, boolean generateForNullable) {
 		super();
 		this.schema = schema;
+		this.generateForNullable = generateForNullable;
 
 		// TODO: handle duplicates
 		for (AutoGenerateSourceContribution contribution : contributions) {
@@ -47,8 +49,8 @@ public class AutoGenerateSourceImpl implements AutoGenerateSource {
 		for (PropertyDef propDef : schema.getPropertyDefs(entityName)) {
 			String propName = propDef.getPropertyName();
 			boolean isAuto = entityStrategies != null && entityStrategies.containsKey(propName);
-			if (!isAuto) {
-				isAuto = !propDef.isNullable() && !propDef.isGenerated() && !propDef.isAutoIncrement();
+			if (!isAuto && !propDef.isGenerated() && !propDef.isAutoIncrement()) {
+				isAuto = generateForNullable || !propDef.isNullable();
 			}
 			if (isAuto) {
 				autoPropNames.add(propName);

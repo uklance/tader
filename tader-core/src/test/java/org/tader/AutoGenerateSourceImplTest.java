@@ -17,7 +17,8 @@ public class AutoGenerateSourceImplTest {
 	public void testGetAutoGeneratePropertyNames() {
 		EntitySchema schema = mock(EntitySchema.class);
 		
-		AutoGenerateSource autoGenSource = new AutoGenerateSourceImpl(schema, Collections.<AutoGenerateSourceContribution>emptyList());
+		AutoGenerateSource autoGenSource1 = new AutoGenerateSourceImpl(schema, Collections.<AutoGenerateSourceContribution>emptyList(), false);
+		AutoGenerateSource autoGenSource2 = new AutoGenerateSourceImpl(schema, Collections.<AutoGenerateSourceContribution>emptyList(), true);
 		
 		MutablePropertyDef propDef1 = new MutablePropertyDef("someEntity", "someTable", "prop1", "column1");
 		MutablePropertyDef propDef2 = new MutablePropertyDef("someEntity", "someTable", "prop2", "column2");
@@ -25,16 +26,20 @@ public class AutoGenerateSourceImplTest {
 
 		when(schema.getPropertyDefs("someEntity")).thenReturn(Arrays.<PropertyDef> asList(propDef1, propDef2, propDef3));
 
-		assertSet(autoGenSource.getAutoGeneratePropertyNames("someEntity"), "prop1", "prop2", "prop3");
+		assertSet(autoGenSource1.getAutoGeneratePropertyNames("someEntity"), "prop1", "prop2", "prop3");
+		assertSet(autoGenSource2.getAutoGeneratePropertyNames("someEntity"), "prop1", "prop2", "prop3");
 		
 		propDef1.setNullable(true);
-		assertSet(autoGenSource.getAutoGeneratePropertyNames("someEntity"), "prop2", "prop3");
+		assertSet(autoGenSource1.getAutoGeneratePropertyNames("someEntity"), "prop2", "prop3");
+		assertSet(autoGenSource2.getAutoGeneratePropertyNames("someEntity"), "prop1", "prop2", "prop3");
 
 		propDef2.setAutoIncrement(true);
-		assertSet(autoGenSource.getAutoGeneratePropertyNames("someEntity"), "prop3");
+		assertSet(autoGenSource1.getAutoGeneratePropertyNames("someEntity"), "prop3");
+		assertSet(autoGenSource2.getAutoGeneratePropertyNames("someEntity"), "prop1", "prop3");
 
 		propDef3.setGenerated(true);
-		assertTrue(autoGenSource.getAutoGeneratePropertyNames("someEntity").isEmpty());
+		assertTrue(autoGenSource1.getAutoGeneratePropertyNames("someEntity").isEmpty());
+		assertSet(autoGenSource2.getAutoGeneratePropertyNames("someEntity"), "prop1");
 	}
 
 	private void assertSet(Set<String> actual, String... expectedValues) {

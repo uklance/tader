@@ -9,6 +9,7 @@ import org.tader.AutoGenerateSourceImpl;
 import org.tader.EntityPersistence;
 import org.tader.EntitySchema;
 import org.tader.Tader;
+import org.tader.TaderConstants;
 import org.tader.TaderImpl;
 import org.tader.TypeCoercer;
 import org.tader.TypeCoercerContribution;
@@ -54,7 +55,9 @@ public class TaderBuilder {
 			@Override
 			public AutoGenerateSource build(ServiceBuilderContext context) {
 				Collection<AutoGenerateSourceContribution> contributions = context.getContributions(AutoGenerateSourceContribution.class);
-				return new AutoGenerateSourceImpl(context.getService(EntitySchema.class), contributions);
+				String prop = context.getProperty(TaderConstants.PROP_DEFAULT_AUTOGENERATE_NULLABLE);
+				boolean autoGenerateNullable = "true".equalsIgnoreCase(prop);
+				return new AutoGenerateSourceImpl(context.getService(EntitySchema.class), contributions, autoGenerateNullable);
 			}
 		};
 		ServiceBuilder<TypeCoercer> typeCoerceBuilder = new ServiceBuilder<TypeCoercer>() {
@@ -66,6 +69,7 @@ public class TaderBuilder {
 		withServiceInstance(Tader.class, TaderImpl.class);
 		withServiceBuilder(AutoGenerateSource.class, autoGenBuilder);
 		withServiceBuilder(TypeCoercer.class, typeCoerceBuilder);
+		withProperty(TaderConstants.PROP_DEFAULT_AUTOGENERATE_NULLABLE, "false");
 		return this;
 	}
 	
