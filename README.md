@@ -52,11 +52,11 @@ CREATE TABLE AUTHOR (
 )
 	
 CREATE TABLE BOOK (
-	BOOK_ID int not null GENERATED ALWAYS AS IDENTITY (START WITH 1, INCREMENT BY 1),
-	BOOK_NAME varchar(255) not null,
-	AUTHOR_ID int not null,
-	constraint PK_BOOK primary key(BOOK_ID),
-	constraint FK_BOOK_AUTHOR foreign key(AUTHOR_ID) references AUTHOR(AUTHOR_ID)
+   BOOK_ID int not null GENERATED ALWAYS AS IDENTITY (START WITH 1, INCREMENT BY 1),
+   BOOK_NAME varchar(255) not null,
+   AUTHOR_ID int not null,
+   constraint PK_BOOK primary key(BOOK_ID),
+   constraint FK_BOOK_AUTHOR foreign key(AUTHOR_ID) references AUTHOR(AUTHOR_ID)
 )
 ```
 
@@ -94,7 +94,46 @@ assertEquals(1, author.getInteger("authorId").intValue());
 
 #### AutoGenerateSource / AutoGenerateStrategy
 
-TODO
+Invoking `TaderBuilder.withCoreAutoGenerateSourceContributions()` will configure the following auto-generate strategies for the following SQL types:
+
+ * VARCHAR - Property name suffixed with a increment starting at 0 (eg authorName0, authorName1)
+ * INTEGER - Integer value starting from 0 incrementing by 1
+ * DECIMAL - Decimal value starting from 0.0 incrementing by 1.0
+ * DATE - Date value starting from today, incrementing by 1 day
+ * TIMESTAMP - Same as DATE
+ * BLOB - getBytes() from VARCHAR strategy
+
+If you want to configure your own custom AutoGenerateStrategy implementations, this can be done by contributing a AutoGenerateSourceContribution:
+
+```java
+import java.sql.Types;
+import java.util.Random;
+...
+final Random random = new Random();
+AutoGenerateStrategy randomIntegerStrategy = new AutoGenerateStrategy() {
+   public Object generate(PropertyDef propDef, int increment) {
+      return random.nextInt();
+   }
+};
+AutoGenerateStrategy fooStringStrategy = new AutoGenerateStrategy() {
+   public Object generate(PropertyDef propDef, int increment) {
+      return "foo";
+   }
+};
+AutoGenerateSourceContribution contribution = new AutoGenerateSourceContribution()
+	.withAutoGenerateStrategy(Types.INTEGER, randomIntegerStrategy)
+	.withAutoGenerateStrategy("author", "authorHobby", fooStringStrategy);
+
+Tader tader = new TaderBuilder()
+   .withCoreServices()
+   .withCoreJdbcServices()
+   .withCoreTypeCoercerContributions()
+   .withCoreAutoGenerateSourceContributions()
+   .withConnectionSource(connectionSource)
+   .withServiceInstance(NameTranslator.class, UpperCamelNameTranslator.class)
+   .withContribution(AutoGenerateSource.class, contribution)
+   .build();
+```
 
 #### NameTranslator
 
