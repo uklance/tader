@@ -125,12 +125,7 @@ AutoGenerateSourceContribution contribution = new AutoGenerateSourceContribution
 	.withAutoGenerateStrategy("author", "authorHobby", fooStringStrategy);
 
 Tader tader = new TaderBuilder()
-   .withCoreServices()
-   .withCoreJdbcServices()
-   .withCoreTypeCoercerContributions()
-   .withCoreAutoGenerateSourceContributions()
-   .withConnectionSource(connectionSource)
-   .withServiceInstance(NameTranslator.class, UpperCamelNameTranslator.class)
+   .with...
    .withContribution(AutoGenerateSource.class, contribution)
    .build();
 ```
