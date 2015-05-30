@@ -94,7 +94,7 @@ assertEquals(1, author.getInteger("authorId").intValue());
 
 #### AutoGenerateSource / AutoGenerateStrategy
 
-Invoking `TaderBuilder.withCoreAutoGenerateSourceContributions()` will configure the following auto-generate strategies for the following SQL types:
+Invoking `TaderBuilder.withCoreAutoGenerateSourceContributions()` will configure auto-generate strategies for the following SQL types:
 
  * VARCHAR - Property name suffixed with a increment starting at 0 (eg authorName0, authorName1)
  * INTEGER - Integer value starting from 0 incrementing by 1
