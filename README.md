@@ -137,7 +137,14 @@ Tader tader = new TaderBuilder()
 
 #### NameTranslator
 
-TODO
+The NameTranslator service converts between entity name / property names used by tader to table name / column names in the database. The NoopNameTranslator is configured by `TaderBuilder.withCoreJdbcServices()` which simply uses the table and column names in the database. If you'd prefer to use author and authorName in your tests instead of AUTHOR and AUTHOR_NAME, configure the UpperCamelNameTranslator.
+
+```java
+Tader tader = new TaderBuilder()
+   .withServiceInstance(NameTranslator.class, UpperCamelNameTranslator.class)
+   .with...
+   .build();
+```
 
 #### TypeCoercer
 
