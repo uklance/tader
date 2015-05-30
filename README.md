@@ -103,7 +103,7 @@ Invoking `TaderBuilder.withCoreAutoGenerateSourceContributions()` will configure
  * TIMESTAMP - Same as DATE
  * BLOB - getBytes() from VARCHAR strategy
 
-If you want to configure your own custom AutoGenerateStrategy implementations, this can be done by contributing a AutoGenerateSourceContribution:
+If you want to configure your own custom AutoGenerateStrategy implementations, this can be done by contributing to the AutoGenerateSource service:
 
 ```java
 import java.sql.Types;
