@@ -34,9 +34,64 @@ Tader tader = new TaderBuilder()
    .withCoreJdbcServices()
    .withCoreTypeCoercerContributions()
    .withCoreAutoGenerateSourceContributions()
-   .withConnectionSource(connectionSource);
+   .withConnectionSource(connectionSource)
+   .withServiceInstance(NameTranslator.class, UpperCamelNameTranslator.class)
    .build();
 ```
+#### Inserting Records
+
+Let's assume we have the following two tables
+
+```sql
+CREATE TABLE AUTHOR (
+   AUTHOR_ID int not null GENERATED ALWAYS AS IDENTITY (START WITH 1, INCREMENT BY 1),
+   AUTHOR_NAME varchar(255) not null,
+   DATE_OF_BIRTH date not null,
+   AUTHOR_HOBBY varchar(255),
+   constraint PK_AUTHOR primary key(AUTHOR_ID)
+)
+	
+CREATE TABLE BOOK (
+	BOOK_ID int not null GENERATED ALWAYS AS IDENTITY (START WITH 1, INCREMENT BY 1),
+	BOOK_NAME varchar(255) not null,
+	AUTHOR_ID int not null,
+	constraint PK_BOOK primary key(BOOK_ID),
+	constraint FK_BOOK_AUTHOR foreign key(AUTHOR_ID) references AUTHOR(AUTHOR_ID)
+)
+```
+
+##### Inserting foreign key records implicitly
+```java
+import static org.junit.Assert.*;
+...
+PartialEntity bookPartial = new PartialEntity("book");
+
+Entity book = tader.insert(bookPartial);
+assertEquals("bookName0", book.getString("bookName"));
+assertEquals(1, book.getInteger("bookId").intValue());
+
+Entity author = book.getEntity("authorId");
+assertEquals("authorName0", author.getString("authorName"));
+assertEquals(1, author.getInteger("authorId").intValue());
+```
+
+##### Inserting foreign key records by PartialEntity
+```java
+PartialEntity authorPartial = new PartialEntity("author")
+   .withValue("authorName", "Stephen King");
+
+PartialEntity bookPartial = new PartialEntity("book")
+   .withValue("authorId", authorPartial);
+
+Entity book = tader.insert(bookPartial);
+assertEquals("bookName0", book.getString("bookName"));
+assertEquals(1, book.getInteger("bookId").intValue());
+
+Entity author = book.getEntity("authorId");
+assertEquals("Stephen King", author.getString("authorName"));
+assertEquals(1, author.getInteger("authorId").intValue());
+```
+
 #### AutoGenerateSource / AutoGenerateStrategy
 
 TODO
@@ -52,24 +107,6 @@ TODO
 #### Examples
 
 Currently, the best example is  [TaderIntegrationTest.java](https://github.com/uklance/tader/blob/master/tader-core/src/test/java/org/tader/TaderIntegrationTest.java).
-
-#### Maven Usage
-
-```xml
-<dependencies>
-   <dependency>
-      <groupId>org.tader</groupId>
-      <artifactId>tader-core</artifactId>
-      <version>0.0.x</version> 
-   </dependency>
-</dependencies>
-<repositories>
-   <repository>
-      <id>lazan-releases</id>
-      <url>https://raw.github.com/uklance/releases/master</url>
-   </repository>
-</repositories>
-```
 
 #### TODO
 * Deploy artifacts to a maven repository
