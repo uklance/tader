@@ -53,6 +53,24 @@ TODO
 
 Currently, the best example is  [TaderIntegrationTest.java](https://github.com/uklance/tader/blob/master/tader-core/src/test/java/org/tader/TaderIntegrationTest.java).
 
+#### Maven Usage
+
+```xml
+<dependencies>
+   <dependency>
+      <groupId>org.tader</groupId>
+      <artifactId>tader-core</artifactId>
+      <version>0.0.x</version> 
+   </dependency>
+</dependencies>
+<repositories>
+   <repository>
+      <id>lazan-releases</id>
+      <url>https://raw.github.com/uklance/releases/master</url>
+   </repository>
+</repositories>
+```
+
 #### TODO
 * Deploy artifacts to a maven repository
 * Documentation, documentation, documentation
