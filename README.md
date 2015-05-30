@@ -136,8 +136,8 @@ The NameTranslator service converts between entity name / property names used by
 
 ```java
 Tader tader = new TaderBuilder()
-   .withServiceInstance(NameTranslator.class, UpperCamelNameTranslator.class)
    .with...
+   .withServiceInstance(NameTranslator.class, UpperCamelNameTranslator.class)
    .build();
 ```
 
