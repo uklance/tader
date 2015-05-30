@@ -130,6 +130,17 @@ Tader tader = new TaderBuilder()
    .build();
 ```
 
+##### Autogenerate for nullable columns
+
+By default, nullable columns will not be auto-generated unless a specific auto-generate strategy is configured for the entity property. To auto-generate for nullable columns by default, set the 'tader.DEFAULT_AUTOGENERATE_NULLABLE' property to true
+
+```
+Tader tader = new TaderBuilder()
+   .with...
+   .withProperty(TaderConstants.PROP_DEFAULT_AUTOGENERATE_NULLABLE, "true")
+   .build();
+```
+
 #### NameTranslator
 
 The NameTranslator service converts between entity name / property names used by tader to table name / column names in the database. The NoopNameTranslator is configured by `TaderBuilder.withCoreJdbcServices()` which simply uses the table and column names in the database. If you'd prefer to use author and authorName in your tests instead of AUTHOR and AUTHOR_NAME, configure the UpperCamelNameTranslator.
