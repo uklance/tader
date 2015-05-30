@@ -5,9 +5,15 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -139,16 +145,21 @@ public class RegistryBuilderTest {
 		}
 	}
 
-	private static final Map<Class, Integer> instanceCounts = new HashMap<Class, Integer>();
+	private static final ConcurrentMap<Class, AtomicInteger> instanceCounts = new ConcurrentHashMap<Class, AtomicInteger>();
 
-	static void incrementInstanceCount(Class type) {
-		Integer prevCount = instanceCounts.get(type);
-		instanceCounts.put(type, prevCount == null ? 1 : prevCount + 1);
+	static int incrementInstanceCount(Class type) {
+		AtomicInteger count = instanceCounts.get(type);
+		if (count == null) {
+			AtomicInteger candidate = new AtomicInteger(0);
+			AtomicInteger prev = instanceCounts.putIfAbsent(type, candidate);
+			count = prev == null ? candidate : prev;
+		}
+		return count.incrementAndGet();
 	}
 
 	static int getInstanceCount(Class type) {
-		Integer count = instanceCounts.get(type);
-		return count == null ? 0 : count;
+		AtomicInteger count = instanceCounts.get(type);
+		return count == null ? 0 : count.get();
 	}
 
 	@Before
@@ -158,11 +169,8 @@ public class RegistryBuilderTest {
 
 	@Test
 	public void testDependencyInjection() {
-		Registry registry = new RegistryBuilder()
-				.withServiceInstance(A.class, AImpl.class)
-				.withServiceInstance(B.class, BImpl.class)
-				.withServiceInstance(C.class, CImpl.class)
-				.build();
+		Registry registry = new RegistryBuilder().withServiceInstance(A.class, AImpl.class).withServiceInstance(B.class, BImpl.class)
+				.withServiceInstance(C.class, CImpl.class).build();
 
 		C c = registry.getService(C.class);
 
@@ -199,10 +207,8 @@ public class RegistryBuilderTest {
 
 	@Test
 	public void testCircularDependencyInjection() {
-		Registry registry = new RegistryBuilder()
-				.withServiceInstance(Circular1.class, Circular1Impl.class)
-				.withServiceInstance(Circular2.class, Circular2Impl.class)
-				.build();
+		Registry registry = new RegistryBuilder().withServiceInstance(Circular1.class, Circular1Impl.class)
+				.withServiceInstance(Circular2.class, Circular2Impl.class).build();
 
 		Circular1 c1 = registry.getService(Circular1.class);
 		Circular2 c2 = registry.getService(Circular2.class);
@@ -227,41 +233,89 @@ public class RegistryBuilderTest {
 		assertEquals(1, getInstanceCount(Circular2.class));
 
 	}
-	
+
 	@Test
 	public void testBuildOnce() {
-		RegistryBuilder builder = new RegistryBuilder()
-			.withServiceInstance(A.class, AImpl.class)
-			.withProperty("p1", "v1");
-		
+		RegistryBuilder builder = new RegistryBuilder().withServiceInstance(A.class, AImpl.class).withProperty("p1", "v1");
+
 		Registry registry = builder.build();
 		assertNotNull(registry);
 		try {
 			builder.withService(List.class, new ArrayList());
 			fail();
-		} catch (RuntimeException e) {}
+		} catch (RuntimeException e) {
+		}
 		try {
 			builder.withServiceInstance(B.class, BImpl.class);
 			fail();
-		} catch (RuntimeException e) {}
+		} catch (RuntimeException e) {
+		}
 		try {
 			builder.withProperty("p2", "v2");
 			fail();
-		} catch (RuntimeException e) {}
+		} catch (RuntimeException e) {
+		}
 		try {
 			builder.build();
 			fail();
-		} catch (RuntimeException e) {}
+		} catch (RuntimeException e) {
+		}
 	}
 
 	@SuppressWarnings("unchecked")
 	@Test
 	public void testGetServiceInterfaces() {
-		Registry registry = new RegistryBuilder()
-			.withServiceInstance(A.class, AImpl.class)
-			.withServiceInstance(B.class, BImpl.class)
-			.build();
-		
+		Registry registry = new RegistryBuilder().withServiceInstance(A.class, AImpl.class).withServiceInstance(B.class, BImpl.class)
+				.build();
+
 		assertEquals(TestUtils.newHashSet(A.class, B.class), registry.getServiceInterfaces());
+	}
+
+	public static interface Service {
+		String getString();
+	}
+
+	public static class DelayService implements Service {
+		final int instanceCount;
+
+		public DelayService() {
+			try {
+				Thread.sleep(500);
+			} catch (InterruptedException e) {
+			}
+			instanceCount = incrementInstanceCount(DelayService.class);
+		}
+
+		@Override
+		public String getString() {
+			return String.valueOf(instanceCount);
+		}
+	}
+
+	@Test
+	public void testConstructorDelay() throws Exception {
+		final Registry registry = new RegistryBuilder()
+			.withServiceInstance(Service.class, DelayService.class)
+			.build();
+
+		Callable<String> callable = new Callable<String>() {
+			@Override
+			public String call() throws Exception {
+				return registry.getService(Service.class).getString();
+			}
+		};
+		ExecutorService pool = Executors.newFixedThreadPool(3);
+		List<Future<String>> futures = new ArrayList<Future<String>>();
+		futures.add(pool.submit(callable));
+		futures.add(pool.submit(callable));
+		futures.add(pool.submit(callable));
+
+		List<String> values = new ArrayList<String>();
+		for (Future<String> future : futures) {
+			values.add(future.get());
+		}
+
+		assertEquals(Arrays.asList("1", "1", "1"), values);
+		assertEquals(3, getInstanceCount(DelayService.class));
 	}
 }
