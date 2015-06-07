@@ -1,9 +1,9 @@
 package org.tader.builder;
 
-public class StaticServiceBuilder<T> implements ServiceBuilder<T> {
+public class ConstantServiceBuilder<T> implements ServiceBuilder<T> {
 	private T service;
 
-	public StaticServiceBuilder(T service) {
+	public ConstantServiceBuilder(T service) {
 		super();
 		this.service = service;
 	}

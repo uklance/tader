@@ -39,11 +39,11 @@ public class RegistryBuilder {
 	}
 
 	public <I, T extends I> RegistryBuilder withService(Class<I> serviceInterface, T service) {
-		return withServiceBuilder(serviceInterface, new StaticServiceBuilder<I>(service));
+		return withServiceBuilder(serviceInterface, new ConstantServiceBuilder<I>(service));
 	}
 
 	public RegistryBuilder withContribution(Class serviceInterface, final Object contribution) {
-		return withContributionBuilder(serviceInterface, new StaticContributionBuilder(contribution));
+		return withContributionBuilder(serviceInterface, new ConstantContributionBuilder(contribution));
 	}
 	
 	public RegistryBuilder withContributionBuilder(Class serviceInterface, ContributionBuilder builder) {

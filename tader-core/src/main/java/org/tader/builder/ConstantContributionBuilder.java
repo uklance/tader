@@ -1,9 +1,9 @@
 package org.tader.builder;
 
-public class StaticContributionBuilder<T> implements ContributionBuilder<T> {
+public class ConstantContributionBuilder<T> implements ContributionBuilder<T> {
 	private final T value;
 	
-	public StaticContributionBuilder(T value) {
+	public ConstantContributionBuilder(T value) {
 		super();
 		this.value = value;
 	}
