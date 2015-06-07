@@ -166,14 +166,7 @@ public class TaderIntegrationTest {
 
 	private void testAllColumnTypesAutogenerate(DatabaseVendor vendor) {
 		ConnectionSource connectionSource = TestUtils.newConnectionSource(vendor);
-		Tader tader = new TaderBuilder()
-			.withCoreServices()
-			.withCoreJdbcServices()
-			.withCoreTypeCoercerContributions()
-			.withCoreAutoGenerateSourceContributions()
-			.withServiceInstance(NameTranslator.class, UpperCamelNameTranslator.class)
-			.withConnectionSource(connectionSource)
-			.build();
+		Tader tader = createCoreTaderBuilder(connectionSource).build();
 	
 		TestUtils.createTableHasAllTypes(vendor, connectionSource);
 		PartialEntity template = new PartialEntity("hasAllTypes");
@@ -213,7 +206,6 @@ public class TaderIntegrationTest {
 			.withCoreJdbcServices()
 			.withCoreTypeCoercerContributions()
 			.withCoreAutoGenerateSourceContributions()
-			//.withContribution(AutoGenerateSource.class, createAutoGenerateSourceContribution())
 			.withServiceInstance(NameTranslator.class, UpperCamelNameTranslator.class)
 			.withConnectionSource(connectionSource);
 		
