@@ -6,6 +6,7 @@ import java.util.Collection;
 import org.tader.AutoGenerateSource;
 import org.tader.AutoGenerateSourceContribution;
 import org.tader.AutoGenerateSourceImpl;
+import org.tader.AutoGenerateStrategy;
 import org.tader.EntityPersistence;
 import org.tader.EntitySchema;
 import org.tader.Tader;
@@ -19,6 +20,7 @@ import org.tader.autogen.DefaultBlobAutoGenerateStrategy;
 import org.tader.autogen.DefaultDateAutoGenerateStrategy;
 import org.tader.autogen.DefaultIntegerAutoGenerateStrategy;
 import org.tader.autogen.DefaultStringAutoGenerateStrategy;
+import org.tader.autogen.QueryAutoGenerateStrategy;
 import org.tader.coercer.BigDecimalDoubleTypeCoercerContribution;
 import org.tader.coercer.ByteArrayInputStreamTypeCoercerContribution;
 import org.tader.coercer.DoubleBigDecimalTypeCoercerContribution;
@@ -116,8 +118,21 @@ public class TaderBuilder {
 			.withAutoGenerateStrategy(Types.TIMESTAMP, new DefaultDateAutoGenerateStrategy())
 			.withAutoGenerateStrategy(Types.BLOB, new DefaultBlobAutoGenerateStrategy());
 
-		withContribution(AutoGenerateSource.class, contribution);
-		return this;
+		return withContribution(AutoGenerateSource.class, contribution);
+	}
+	
+	public TaderBuilder withAutoGenerateStrategy(int sqlType, AutoGenerateStrategy strategy) {
+		AutoGenerateSourceContribution contribution = new AutoGenerateSourceContribution()
+			.withAutoGenerateStrategy(sqlType, strategy);
+		
+		return withContribution(AutoGenerateSource.class, contribution);
+	}
+
+	public TaderBuilder withAutoGenerateStrategy(String entity, String property, AutoGenerateStrategy strategy) {
+		AutoGenerateSourceContribution contribution = new AutoGenerateSourceContribution()
+			.withAutoGenerateStrategy(entity, property, strategy);
+		
+		return withContribution(AutoGenerateSource.class, contribution);
 	}
 	
 	/**
@@ -176,6 +191,27 @@ public class TaderBuilder {
 		return this;
 	}
 
+	@SuppressWarnings("rawtypes")
+	public TaderBuilder withContributionBuilder(Class<?> serviceInterface, ContributionBuilder builder) {
+		registryBuilder.withContributionBuilder(serviceInterface, builder);
+		return this;
+	}
+	
+	public TaderBuilder withQueryAutoGenerateStrategy(
+			final String entityName, final String propertyName, final String sql, final Class<?> type)
+	{
+		ContributionBuilder<AutoGenerateSourceContribution> builder = new ContributionBuilder<AutoGenerateSourceContribution>() {
+			@Override
+			public AutoGenerateSourceContribution build(ContributionBuilderContext context) {
+				TypeCoercer typeCoercer = context.getService(TypeCoercer.class);
+				JdbcTemplate jdbcTemplate = context.getService(JdbcTemplate.class);
+				AutoGenerateStrategy strategy = new QueryAutoGenerateStrategy(jdbcTemplate, typeCoercer, sql, type);
+				return new AutoGenerateSourceContribution().withAutoGenerateStrategy(entityName, propertyName, strategy);
+			}
+		};
+		return withContributionBuilder(AutoGenerateSource.class, builder);
+	}
+	
 	/**
 	 * Sets a property on the builder. These properties are accessible to {@link ServiceBuilder}s
 	 * @param name The property name
@@ -186,7 +222,7 @@ public class TaderBuilder {
 		registryBuilder.withProperty(name, value);
 		return this;
 	}
-
+	
 	/**
 	 * Builds the service registry and returns the {@link Tader} service
 	 * @return A {@link Tader} instance

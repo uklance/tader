@@ -22,7 +22,7 @@ import java.util.concurrent.atomic.AtomicReference;
 public class RegistryBuilder {
 	private Map<Class, ServiceBuilder> serviceBuilders = new LinkedHashMap<Class, ServiceBuilder>();
 	private Map<String, String> properties = new LinkedHashMap<String, String>();
-	private Map<Class, Collection<Object>> contributionMap = new LinkedHashMap<Class, Collection<Object>>();
+	private Map<Class, Collection<ContributionBuilder>> contributionBuilders = new LinkedHashMap<Class, Collection<ContributionBuilder>>();
 	private final ClassLoader classloader = RegistryBuilder.class.getClassLoader();
 	private boolean isBuilt = false;
 
@@ -42,16 +42,20 @@ public class RegistryBuilder {
 		return withServiceBuilder(serviceInterface, new StaticServiceBuilder<I>(service));
 	}
 
-	public RegistryBuilder withContribution(Class serviceInterface, Object contribution) {
+	public RegistryBuilder withContribution(Class serviceInterface, final Object contribution) {
+		return withContributionBuilder(serviceInterface, new StaticContributionBuilder(contribution));
+	}
+	
+	public RegistryBuilder withContributionBuilder(Class serviceInterface, ContributionBuilder builder) {
 		if (isBuilt) {
 			throw new IllegalStateException("Registry has already been built");
 		}
-		Collection<Object> collection = contributionMap.get(serviceInterface);
+		Collection<ContributionBuilder> collection = contributionBuilders.get(serviceInterface);
 		if (collection == null) {
-			collection = new ArrayList<Object>();
-			contributionMap.put(serviceInterface, collection);
+			collection = new ArrayList<ContributionBuilder>();
+			contributionBuilders.put(serviceInterface, collection);
 		}
-		collection.add(contribution);
+		collection.add(builder);
 		return this;
 	}
 
@@ -62,23 +66,40 @@ public class RegistryBuilder {
 		properties.put(name, value);
 		return this;
 	}
+	
+	private <T> T getOrCreateProxy(
+			Class<T> serviceInterface, 
+			ConcurrentMap<Class, Object> serviceProxies, 
+			ConcurrentMap<Class, Collection> contributions,
+			ContributionBuilderContext contributionContext
+	) {
+		if (serviceProxies.containsKey(serviceInterface)) {
+			return serviceInterface.cast(serviceProxies.get(serviceInterface));
+		}
+		ServiceBuilderContext context = createServiceBuilderContext(serviceInterface, serviceProxies, contributions, contributionContext);
+		T proxyCandidate = createProxy(serviceInterface, context);
+		T existingProxy = serviceInterface.cast(serviceProxies.putIfAbsent(serviceInterface, proxyCandidate));
+		return existingProxy == null ? proxyCandidate : existingProxy;
+	}
 
 	public Registry build() {
 		if (isBuilt) {
 			throw new IllegalStateException("Registry has already been built");
 		}
 		final ConcurrentMap<Class, Object> serviceProxies = new ConcurrentHashMap<Class, Object>();
+		final ConcurrentMap<Class, Collection> contributions = new ConcurrentHashMap<Class, Collection>();
+		
+		final ContributionBuilderContext contributionContext = new ContributionBuilderContext() {
+			@Override
+			public <T> T getService(Class<T> serviceInterface) {
+				return getOrCreateProxy(serviceInterface, serviceProxies, contributions, this);
+			}
+		};
 
 		Registry registry = new Registry() {
 			@Override
 			public <T> T getService(Class<T> serviceInterface) {
-				if (serviceProxies.containsKey(serviceInterface)) {
-					return serviceInterface.cast(serviceProxies.get(serviceInterface));
-				}
-				ServiceBuilderContext context = createServiceBuilderContext(serviceInterface, this);
-				T proxyCandidate = createProxy(serviceInterface, context);
-				T existingProxy = serviceInterface.cast(serviceProxies.putIfAbsent(serviceInterface, proxyCandidate));
-				return existingProxy == null ? proxyCandidate : existingProxy;
+				return getOrCreateProxy(serviceInterface, serviceProxies, contributions, contributionContext);
 			}
 			
 			@Override
@@ -90,11 +111,16 @@ public class RegistryBuilder {
 		return registry;
 	}
 
-	private <I> ServiceBuilderContext createServiceBuilderContext(final Class<I> serviceInterface, final Registry registry) {
+	private <I> ServiceBuilderContext createServiceBuilderContext(
+			final Class<I> serviceInterface, 
+			final ConcurrentMap<Class, Object> serviceProxies, 
+			final ConcurrentMap<Class, Collection> contributions,
+			final ContributionBuilderContext contributionContext
+	) {
 		return new ServiceBuilderContext() {
 			@Override
-			public <T> T getService(Class<T> serviceInterface) {
-				return registry.getService(serviceInterface);
+			public <T> T getService(Class<T> serviceInterface2) {
+				return getOrCreateProxy(serviceInterface2, serviceProxies, contributions, contributionContext);
 			}
 
 			@Override
@@ -107,8 +133,22 @@ public class RegistryBuilder {
 
 			@Override
 			public <T> Collection<T> getContributions(Class<T> contributionType) {
-				Collection<T> contributions = (Collection<T>) contributionMap.get(serviceInterface);
-				return contributions == null ? Collections.<T> emptyList() : Collections.unmodifiableCollection(contributions);
+				Collection<T> serviceContributions = (Collection<T>) contributions.get(serviceInterface);
+				if (serviceContributions == null) {
+					Collection<ContributionBuilder> builders = contributionBuilders.get(serviceInterface);
+					Collection<T> candidate;
+					if (builders == null || builders.isEmpty()) {
+						candidate = Collections.<T> emptyList();
+					} else {
+						candidate = new ArrayList<T>();
+						for (ContributionBuilder builder : builders) {
+							candidate.add((T) builder.build(contributionContext));
+						}
+					}
+					Collection<T> previous = contributions.putIfAbsent(serviceInterface, candidate);
+					serviceContributions = previous == null ? candidate : previous;
+				}
+				return serviceContributions;
 			}
 		};
 	}

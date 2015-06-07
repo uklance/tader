@@ -55,12 +55,19 @@ public class TaderIntegrationTest {
 		}
 	}
 
+	@Test
+	public void testQueryAutoGenerateStrategy() {
+		for (DatabaseVendor vendor : DatabaseVendor.values()) {
+			testQueryAutoGenerateStrategy(vendor);
+		}
+	}
+	
 	private void testPartialDependency(DatabaseVendor vendor) {
 		ConnectionSource connectionSource = TestUtils.newConnectionSource(vendor);
 		TestUtils.createTableAuthor(vendor, connectionSource);
 		TestUtils.createTableBook(vendor, connectionSource);
 		
-		Tader tader = createTader(connectionSource);
+		Tader tader = createAuthorBookTader(connectionSource);
 		
 		PartialEntity authorPartial = new PartialEntity("author").withValue("authorName", "foo");
 		
@@ -80,7 +87,7 @@ public class TaderIntegrationTest {
 		TestUtils.createTableAuthor(vendor, connectionSource);
 		TestUtils.createTableBook(vendor, connectionSource);
 		
-		Tader tader = createTader(connectionSource);
+		Tader tader = createAuthorBookTader(connectionSource);
 		
 		PartialEntity bookPartial = new PartialEntity("book");
 		
@@ -98,7 +105,7 @@ public class TaderIntegrationTest {
 		TestUtils.createTableAuthor(vendor, connectionSource);
 		TestUtils.createTableBook(vendor, connectionSource);
 		
-		Tader tader = createTader(connectionSource);
+		Tader tader = createAuthorBookTader(connectionSource);
 		
 		Entity author1 = tader.insert(new PartialEntity("author"));
 		assertEquals(100, author1.getInteger("authorId").intValue());
@@ -117,7 +124,7 @@ public class TaderIntegrationTest {
 		TestUtils.createTableAuthor(vendor, connectionSource);
 		TestUtils.createTableBook(vendor, connectionSource);
 		
-		Tader tader = createTader(connectionSource);
+		Tader tader = createAuthorBookTader(connectionSource);
 		
 		PartialEntity authorPartial = new PartialEntity("author");
 		
@@ -133,6 +140,28 @@ public class TaderIntegrationTest {
 
 		tader.delete(inserted.get(2));
 		assertEquals(0, TestUtils.getAuthorCount(connectionSource));
+	}
+	
+	private void testQueryAutoGenerateStrategy(DatabaseVendor vendor) {
+		ConnectionSource connectionSource = TestUtils.newConnectionSource(vendor);
+		TestUtils.createTableHasAllTypes(vendor, connectionSource);
+		
+		PartialEntity partial1 = new PartialEntity("hasAllTypes").withValue("intRequired", "10");
+		
+		String sql = "select max(INT_REQUIRED) + 5 from HAS_ALL_TYPES";
+		Tader tader = createCoreTaderBuilder(connectionSource)
+			.withQueryAutoGenerateStrategy("hasAllTypes", "intRequired", sql, Long.class)
+			.build();
+		
+		List<Entity> entities = new ArrayList<Entity>();
+		entities.add(tader.insert(partial1));
+
+		PartialEntity partial2 = new PartialEntity("hasAllTypes");
+		entities.add(tader.insert(partial2));
+		entities.add(tader.insert(partial2));
+		entities.add(tader.insert(partial2));
+		
+		assertColumn(entities, "intRequired", Integer.class, 10, 15, 20, 25);
 	}
 
 	private void testAllColumnTypesAutogenerate(DatabaseVendor vendor) {
@@ -178,29 +207,26 @@ public class TaderIntegrationTest {
 		assertNullColumn(entities, "decimalNullable");
 	}
 
-	private Tader createTader(ConnectionSource connectionSource) {
+	private TaderBuilder createCoreTaderBuilder(ConnectionSource connectionSource) {
 		TaderBuilder builder = new TaderBuilder()
 			.withCoreServices()
 			.withCoreJdbcServices()
 			.withCoreTypeCoercerContributions()
 			.withCoreAutoGenerateSourceContributions()
-			.withContribution(AutoGenerateSource.class, createAutoGenerateSourceContribution())
+			//.withContribution(AutoGenerateSource.class, createAutoGenerateSourceContribution())
 			.withServiceInstance(NameTranslator.class, UpperCamelNameTranslator.class)
 			.withConnectionSource(connectionSource);
 		
-		return builder.build();
+		return builder;
 	}
 
-	private AutoGenerateSourceContribution createAutoGenerateSourceContribution() {
-		
+	private Tader createAuthorBookTader(ConnectionSource connectionSource) {
 		AutoGenerateStrategy countFromOneHundred = new DefaultIntegerAutoGenerateStrategy(100, 1);
 		AutoGenerateStrategy countFromTwoHundred = new DefaultIntegerAutoGenerateStrategy(200, 1);
-		
-		AutoGenerateSourceContribution contribution = new AutoGenerateSourceContribution()
+		return createCoreTaderBuilder(connectionSource)
 			.withAutoGenerateStrategy("author", "authorId", countFromOneHundred)
-			.withAutoGenerateStrategy("book",  "bookId", countFromTwoHundred);
-		
-		return contribution;
+			.withAutoGenerateStrategy("book",  "bookId", countFromTwoHundred)
+			.build();
 	}
 
 	private void assertNullColumn(List<Entity> entities, String propertyName) {
