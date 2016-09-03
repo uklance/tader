@@ -1,0 +1,70 @@
+plugins {
+	id 'java'
+	id 'jacoco'
+	id 'maven-publish'
+	id 'com.github.kt3k.coveralls' version '2.6.3'
+	id 'com.jfrog.bintray' version '1.7'
+	id 'nebula.javadoc-jar' version '4.4.4'
+	id 'nebula.source-jar' version '4.4.4'
+}
+
+group = 'com.lazan'
+version = '0.0.1-SNAPSHOT'
+
+repositories {
+	jcenter()
+}
+
+dependencies {
+	compile 'javax.inject:javax.inject:1'
+	testCompile 'junit:junit:4.12'
+	testCompile 'org.mockito:mockito-all:1.10.19'
+	testCompile 'com.h2database:h2:1.3.172'
+	testCompile 'org.hsqldb:hsqldb:2.3.2'
+	testCompile 'com.h2database:h2:1.4.187'
+	testCompile 'org.apache.derby:derby:10.11.1.1'	
+}
+
+jacocoTestReport {
+	reports {
+		xml.enabled = true
+		html.enabled = true
+	}
+}
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            from components.java
+        }
+    }
+}
+
+bintray {
+    user = project.properties['bintrayUser']
+    key = project.properties['bintrayKey']
+	publications = ['maven', 'nebula']
+	publish = false
+	pkg {
+		repo = 'maven'
+		name = project.name
+		licenses = ['Apache-2.0']
+		vcsUrl = 'https://github.com/uklance/tader.git'
+		githubRepo = 'uklance/tader'
+		//labels = ['ioc']
+		version {
+			name = project.version
+			released = new Date()
+			desc = "Tader ${project.version}"
+		}
+	}
+}
+
+test {
+	testLogging {
+		exceptionFormat = 'full'
+	}
+	beforeTest { TestDescriptor descriptor ->
+		logger.lifecycle("   Running: $descriptor")
+	}
+}

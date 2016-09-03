@@ -1,4 +1,10 @@
 language: java
-after_success:
-  - mvn -pl :tader-core clean test jacoco:report coveralls:report
 
+jdk:
+- oraclejdk8
+
+env:
+- CI=true
+
+after_success:
+- ./gradlew jacocoTestReport coveralls
