@@ -6,5 +6,8 @@ jdk:
 env:
 - CI=true
 
+before_install:
+ - chmod +x gradlew
+
 after_success:
 - ./gradlew jacocoTestReport coveralls
