@@ -206,7 +206,7 @@ public class TaderIntegrationTest {
 			.withCoreJdbcServices()
 			.withCoreTypeCoercerContributions()
 			.withCoreAutoGenerateSourceContributions()
-			.withServiceInstance(NameTranslator.class, UpperCamelNameTranslator.class)
+			.withServiceOverride(NameTranslator.class, UpperCamelNameTranslator.class)
 			.withConnectionSource(connectionSource);
 		
 		return builder;

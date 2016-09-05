@@ -2,6 +2,7 @@ package org.tader.builder;
 
 import java.sql.Types;
 import java.util.Collection;
+import java.util.concurrent.atomic.AtomicLong;
 
 import org.tader.AutoGenerateSource;
 import org.tader.AutoGenerateSourceContribution;
@@ -9,6 +10,8 @@ import org.tader.AutoGenerateSourceImpl;
 import org.tader.AutoGenerateStrategy;
 import org.tader.EntityPersistence;
 import org.tader.EntitySchema;
+import org.tader.PropertySource;
+import org.tader.PropertySourceImpl;
 import org.tader.Tader;
 import org.tader.TaderConstants;
 import org.tader.TaderImpl;
@@ -42,36 +45,63 @@ import org.tader.jdbc.NoopNameTranslator;
 import org.tader.jdbc.SelectHandlerSource;
 import org.tader.jdbc.SelectHandlerSourceImpl;
 
+import com.lazan.tinyioc.ServiceBinder;
+import com.lazan.tinyioc.ServiceBuilder;
+import com.lazan.tinyioc.ServiceBuilderContext;
+import com.lazan.tinyioc.ServiceModule;
+import com.lazan.tinyioc.ServiceRegistry;
+import com.lazan.tinyioc.ServiceRegistryBuilder;
+import com.lazan.tinyioc.annotations.Bind;
+import com.lazan.tinyioc.internal.ConstantServiceBuilder;
+
 /**
  * A convenient way of instantiating a {@link Tader} instance via inversion of control.
  */
 public class TaderBuilder {
-	private RegistryBuilder registryBuilder = new RegistryBuilder();
+	private ServiceRegistryBuilder registryBuilder = new ServiceRegistryBuilder();
+	private AtomicLong nextContributionId = new AtomicLong(1L);
+	
+	public static class CoreServicesModule {
+		@Bind
+		public void bind(ServiceBinder binder) {
+			ServiceBuilder<AutoGenerateSource> autoGenBuilder = new ServiceBuilder<AutoGenerateSource>() {
+				@Override
+				public AutoGenerateSource build(ServiceBuilderContext context) {
+					PropertySource propertySource = context.getServiceRegistry().getService(PropertySource.class);
+					EntitySchema entitySchema = context.getServiceRegistry().getService(EntitySchema.class);
+					Collection<AutoGenerateSourceContribution> contributions = context.getUnorderedContributions(AutoGenerateSourceContribution.class);
+					String prop = propertySource.getProperty(TaderConstants.PROP_DEFAULT_AUTOGENERATE_NULLABLE);
+					boolean autoGenerateNullable = "true".equalsIgnoreCase(prop);
+					return new AutoGenerateSourceImpl(entitySchema, contributions, autoGenerateNullable);
+				}
+			};
+			ServiceBuilder<TypeCoercer> typeCoerceBuilder = new ServiceBuilder<TypeCoercer>() {
+				@SuppressWarnings("rawtypes")
+				@Override
+				public TypeCoercer build(ServiceBuilderContext context) {
+					Collection<TypeCoercerContribution> contributions = context.getUnorderedContributions(TypeCoercerContribution.class);
+					return new TypeCoercerImpl(contributions);
+				}
+			};
+			binder.bind(Tader.class, TaderImpl.class);
+			binder.bind(AutoGenerateSource.class, autoGenBuilder).withUnorderedContribution(AutoGenerateSourceContribution.class);
+			binder.bind(TypeCoercer.class, typeCoerceBuilder).withUnorderedContribution(TypeCoercerContribution.class);
+			binder.bind(PropertySource.class, new ServiceBuilder<PropertySource>() {
+				@Override
+				public PropertySource build(ServiceBuilderContext context) {
+					return new PropertySourceImpl(context.getMappedContributions(String.class, String.class));
+				}
+			}).withMappedContribution(String.class, String.class);
+			binder.mappedContribution(PropertySource.class, TaderConstants.PROP_DEFAULT_AUTOGENERATE_NULLABLE, TaderConstants.PROP_DEFAULT_AUTOGENERATE_NULLABLE, "false");
+		}
+	}
 	
 	/**
 	 * Registers services in the org.tader package
 	 * @return this TaderBuilder for further configuration
 	 */
 	public TaderBuilder withCoreServices() {
-		ServiceBuilder<AutoGenerateSource> autoGenBuilder = new ServiceBuilder<AutoGenerateSource>() {
-			@Override
-			public AutoGenerateSource build(ServiceBuilderContext context) {
-				Collection<AutoGenerateSourceContribution> contributions = context.getContributions(AutoGenerateSourceContribution.class);
-				String prop = context.getProperty(TaderConstants.PROP_DEFAULT_AUTOGENERATE_NULLABLE);
-				boolean autoGenerateNullable = "true".equalsIgnoreCase(prop);
-				return new AutoGenerateSourceImpl(context.getService(EntitySchema.class), contributions, autoGenerateNullable);
-			}
-		};
-		ServiceBuilder<TypeCoercer> typeCoerceBuilder = new ServiceBuilder<TypeCoercer>() {
-			@Override
-			public TypeCoercer build(ServiceBuilderContext context) {
-				return new TypeCoercerImpl(context.getContributions(TypeCoercerContribution.class));
-			}
-		};
-		withServiceInstance(Tader.class, TaderImpl.class);
-		withServiceBuilder(AutoGenerateSource.class, autoGenBuilder);
-		withServiceBuilder(TypeCoercer.class, typeCoerceBuilder);
-		withProperty(TaderConstants.PROP_DEFAULT_AUTOGENERATE_NULLABLE, "false");
+		registryBuilder.withModuleType(CoreServicesModule.class);
 		return this;
 	}
 	
@@ -80,13 +110,13 @@ public class TaderBuilder {
 	 * @return this TaderBuilder for further configuration
 	 */
 	public TaderBuilder withCoreJdbcServices() {
-		withServiceInstance(JdbcTemplate.class, JdbcTemplateImpl.class);
-		withServiceInstance(NameTranslator.class, NoopNameTranslator.class);
-		withServiceInstance(EntitySchema.class, JdbcEntitySchema.class);
-		withServiceInstance(EntityPersistence.class, JdbcEntityPersistence.class);
-		withServiceInstance(BlobTypeAnalyzer.class, BlobTypeAnalyzerImpl.class);
-		withServiceInstance(SelectHandlerSource.class, SelectHandlerSourceImpl.class);
-		withServiceInstance(InsertHandlerSource.class, InsertHandlerSourceImpl.class);
+		withService(JdbcTemplate.class, JdbcTemplateImpl.class);
+		withService(NameTranslator.class, NoopNameTranslator.class);
+		withService(EntitySchema.class, JdbcEntitySchema.class);
+		withService(EntityPersistence.class, JdbcEntityPersistence.class);
+		withService(BlobTypeAnalyzer.class, BlobTypeAnalyzerImpl.class);
+		withService(SelectHandlerSource.class, SelectHandlerSourceImpl.class);
+		withService(InsertHandlerSource.class, InsertHandlerSourceImpl.class);
 		return this;
 	}
 	
@@ -142,17 +172,12 @@ public class TaderBuilder {
 	 * @return this TaderBuilder for further configuration
 	 */
 	public <I, T extends I> TaderBuilder withService(Class<I> serviceInterface, T service) {
-		registryBuilder.withService(serviceInterface, service);
-		return this;
-	}
-
-	/**
-	 * Convenience method to register a {@link ConnectionSource}
-	 * @param connectionSource The connection source
-	 * @return this TaderBuilder for further configuration
-	 */
-	public TaderBuilder withConnectionSource(ConnectionSource connectionSource) {
-		registryBuilder.withService(ConnectionSource.class, connectionSource);
+		registryBuilder.withModule(new ServiceModule() {
+			@Override
+			public void bind(ServiceBinder binder) {
+				binder.bind(serviceInterface, service);
+			}
+		});
 		return this;
 	}
 
@@ -162,8 +187,13 @@ public class TaderBuilder {
 	 * @param builder Callback to instantiate a service instance
 	 * @return this TaderBuilder for further configuration
 	 */
-	public <T> TaderBuilder withServiceBuilder(Class<T> serviceInterface, ServiceBuilder<T> builder) {
-		registryBuilder.withServiceBuilder(serviceInterface, builder);
+	public <T> TaderBuilder withService(Class<T> serviceInterface, ServiceBuilder<T> builder) {
+		registryBuilder.withModule(new ServiceModule() {
+			@Override
+			public void bind(ServiceBinder binder) {
+				binder.bind(serviceInterface, builder);
+			}
+		});
 		return this;
 	}
 
@@ -174,9 +204,72 @@ public class TaderBuilder {
 	 * @param serviceType The concrete service type
 	 * @return this TaderBuilder for further configuration
 	 */
-	public <I, T extends I> TaderBuilder withServiceInstance(Class<I> serviceInterface, Class<T> serviceType) {
-		registryBuilder.withServiceInstance(serviceInterface, serviceType);
+	public <I, T extends I> TaderBuilder withService(Class<I> serviceInterface, Class<T> serviceType) {
+		registryBuilder.withModule(new ServiceModule() {
+			@Override
+			public void bind(ServiceBinder binder) {
+				binder.bind(serviceInterface, serviceType);
+			}
+		});
 		return this;
+	}
+
+	/**
+	 * Overrides a service
+	 * @param serviceInterface The service interface
+	 * @param service The service instance
+	 * @return this TaderBuilder for further configuration
+	 */
+	public <I, T extends I> TaderBuilder withServiceOverride(Class<I> serviceInterface, T service) {
+		registryBuilder.withModule(new ServiceModule() {
+			@Override
+			public void bind(ServiceBinder binder) {
+				binder.override(serviceInterface, service);
+			}
+		});
+		return this;
+	}
+
+	/**
+	 * Overrides a service
+	 * @param serviceInterface The service interface
+	 * @param builder Callback to instantiate a service instance
+	 * @return this TaderBuilder for further configuration
+	 */
+	public <T> TaderBuilder withServiceOverride(Class<T> serviceInterface, ServiceBuilder<T> builder) {
+		registryBuilder.withModule(new ServiceModule() {
+			@Override
+			public void bind(ServiceBinder binder) {
+				binder.override(serviceInterface, builder);
+			}
+		});
+		return this;
+	}
+
+	/**
+	 * Overrides a service using a builder that will reflectively invoke the constructor of serviceType, passing any
+	 * services to it that match the constructor argument types
+	 * @param serviceInterface The service interface
+	 * @param serviceType The concrete service type
+	 * @return this TaderBuilder for further configuration
+	 */
+	public <I, T extends I> TaderBuilder withServiceOverride(Class<I> serviceInterface, Class<T> serviceType) {
+		registryBuilder.withModule(new ServiceModule() {
+			@Override
+			public void bind(ServiceBinder binder) {
+				binder.override(serviceInterface, serviceType);
+			}
+		});
+		return this;
+	}
+	
+	/**
+	 * Convenience method to register a {@link ConnectionSource}
+	 * @param connectionSource The connection source
+	 * @return this TaderBuilder for further configuration
+	 */
+	public TaderBuilder withConnectionSource(ConnectionSource connectionSource) {
+		return withService(ConnectionSource.class, connectionSource);
 	}
 
 	/**
@@ -186,30 +279,32 @@ public class TaderBuilder {
 	 * @param contribution A single contribution entry which will be aggregated into a collection prior to building the service
 	 * @return this TaderBuilder for further configuration
 	 */
-	public TaderBuilder withContribution(Class<?> serviceInterface, Object contribution) {
-		registryBuilder.withContribution(serviceInterface, contribution);
-		return this;
-	}
-
-	@SuppressWarnings("rawtypes")
-	public TaderBuilder withContributionBuilder(Class<?> serviceInterface, ContributionBuilder builder) {
-		registryBuilder.withContributionBuilder(serviceInterface, builder);
+	public TaderBuilder withContribution(Class<?> serviceInterface, ServiceBuilder<?> builder) {
+		registryBuilder.withModule(new ServiceModule() {
+			@Override
+			public void bind(ServiceBinder binder) {
+				binder.unorderedContribution(serviceInterface, String.valueOf(nextContributionId.getAndIncrement()), builder);
+			}
+		});
 		return this;
 	}
 	
-	public TaderBuilder withQueryAutoGenerateStrategy(
-			final String entityName, final String propertyName, final String sql, final Class<?> type)
-	{
-		ContributionBuilder<AutoGenerateSourceContribution> builder = new ContributionBuilder<AutoGenerateSourceContribution>() {
+	public TaderBuilder withContribution(Class<?> serviceInterface, Object contribution) {
+		return withContribution(serviceInterface, new ConstantServiceBuilder<>(contribution));
+	}
+	
+	public TaderBuilder withQueryAutoGenerateStrategy(String entityName, String propertyName, String sql, Class<?> type) {
+		ServiceBuilder<AutoGenerateSourceContribution> builder = new ServiceBuilder<AutoGenerateSourceContribution>() {
 			@Override
-			public AutoGenerateSourceContribution build(ContributionBuilderContext context) {
-				TypeCoercer typeCoercer = context.getService(TypeCoercer.class);
-				JdbcTemplate jdbcTemplate = context.getService(JdbcTemplate.class);
+			public AutoGenerateSourceContribution build(ServiceBuilderContext context) {
+				ServiceRegistry registry = context.getServiceRegistry();
+				TypeCoercer typeCoercer = registry.getService(TypeCoercer.class);
+				JdbcTemplate jdbcTemplate = registry.getService(JdbcTemplate.class);
 				AutoGenerateStrategy strategy = new QueryAutoGenerateStrategy(jdbcTemplate, typeCoercer, sql, type);
 				return new AutoGenerateSourceContribution().withAutoGenerateStrategy(entityName, propertyName, strategy);
 			}
 		};
-		return withContributionBuilder(AutoGenerateSource.class, builder);
+		return withContribution(AutoGenerateSource.class, builder);
 	}
 	
 	/**
@@ -219,7 +314,13 @@ public class TaderBuilder {
 	 * @return this TaderBuilder for further configuration
 	 */
 	public TaderBuilder withProperty(String name, String value) {
-		registryBuilder.withProperty(name, value);
+		ServiceModule module = new ServiceModule() {
+			@Override
+			public void bind(ServiceBinder binder) {
+				binder.mappedContribution(PropertySource.class, String.valueOf(nextContributionId.getAndIncrement()), name, value);
+			}
+		};
+		registryBuilder.withModule(module);
 		return this;
 	}
 	
@@ -231,7 +332,7 @@ public class TaderBuilder {
 		return buildRegistry().getService(Tader.class);
 	}
 
-	protected Registry buildRegistry() {
+	protected ServiceRegistry buildRegistry() {
 		return registryBuilder.build();
 	}
 }

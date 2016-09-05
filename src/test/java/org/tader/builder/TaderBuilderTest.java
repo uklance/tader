@@ -6,10 +6,12 @@ import java.math.BigDecimal;
 import org.junit.Test;
 import org.tader.TypeCoercer;
 
+import com.lazan.tinyioc.ServiceRegistry;
+
 public class TaderBuilderTest {
 	@Test
 	public void testWithCoreTypeCoercerContributions() {
-		Registry registry = new TaderBuilder()
+		ServiceRegistry registry = new TaderBuilder()
 			.withCoreServices()
 			.withCoreTypeCoercerContributions()
 			.buildRegistry();

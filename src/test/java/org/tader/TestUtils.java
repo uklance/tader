@@ -130,6 +130,7 @@ public class TestUtils {
 		return template.execute(callback);
 	}
 
+	@SuppressWarnings("unchecked") 
 	public static <T> Set<T> newHashSet(T... values) {
 		return new HashSet<T>(Arrays.asList(values));
 	}
